@@ -135,4 +135,41 @@ class Unified_Buffer {
 
 
 int main() {
+	// Input, Weight Data to Array Structure, Global Variable Set
+	// Class Declaration
+
+	int DRAM_Input_fmap [a][b][c];
+	int DRAM_Weight_fmap [m][a][b][c];
+	int Channel;
+	int Input_fmap_Row;
+	int Input_fmap_Col;
+
+
+
+
+
+
+
+	// Input Array Structure to Unified Buffer(DRAM -> Unified Buffer) 
+	Unified_Buffer UB1(DRAM_Input_fmap, Channel, Input_fmap_Row, Input_fmap_Col);
+
+	// Unified Buffer to Input_fmap Queue
+	UB1.QueueMapping();
+
 	
+	//Weight Array Structure to Weight FIFO
+	Weight_FIFO WF1();
+	WF1.FIFOMapping(&DRAM_Weight_fmap, );
+
+
+	// Queue to PE(Both of Weight, Input fmap)
+
+
+
+
+	// PE execution
+
+
+
+
+	// PE Partial Sum to Unified Buffer
