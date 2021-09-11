@@ -5,6 +5,24 @@
 
 using namespace std;
 
+typedef struct AR{
+	public:
+		int *ptr;
+
+		AR(int Filter_Size) : 
+		{
+			ptr = new int[Filter_Size];
+		}
+
+		~AR() :
+		{
+			delete[] ptr;
+		}
+
+};
+
+
+
 class Unified_Buffer {
 	private:	
 		int ***input_fmap;
@@ -12,8 +30,8 @@ class Unified_Buffer {
 		int Input_fmap_Row;
 		int Input_fmap_Col;
 		int Strides;
-		queue<int> *FIFO;				// queue의 Array가 아닌 Array를 원소로 갖는 하나의 Queue로 변경해야함!
-	
+		queue<AR> *FIFO;
+
 	public:
 		Unified_Buffer(int ***DRAM_input_fmap, int Channel, int Input_fmap_Row, int Input_fmap_Col, int Strides){
 			input_fmap = new int **[Channel];
@@ -29,7 +47,7 @@ class Unified_Buffer {
 			}
 		// Data Transport(DRAM -> Unified Buffer)
 		memcpy(input_fmap, DRAM_input_fmap, sizeof(input_fmap) * Input_fmap_Row * Input_fmap_Col);
-
+		
 		}
 
 		~Unified_Buffer(){
@@ -56,8 +74,13 @@ void Unified_Buffer::QueueMapping(int Filter_Row, int Filter_Col, int Filter_Cha
 	int FIFO_Element[Element_Size];
 	int Element_Index = 0;
 
+	// Struct Construct
+	AR AR1(Element_Size);
+
 	// Malloc Queue Size, It Needs QueueClear essentially!
-	this -> FIFO = new queue[pow((Input_fmap_Row-Filter_Row)/Strides + 1, 2)];
+	this -> FIFO = new queue<AR>;
+
+	//this -> FIFO = new queue[pow((Input_fmap_Row-Filter_Row)/Strides + 1, 2)];
 	int FIFO_Index= 0;
 
 	for(Start_Row=0; Start_Row<input_fmap_Row-Filter_Row+1; Start_Row++){
@@ -65,17 +88,16 @@ void Unified_Buffer::QueueMapping(int Filter_Row, int Filter_Col, int Filter_Cha
 			for(i=0; i<Filter_Channel; i++){
 				for(j=Start_Row; j<Filter_Row+Start_Row; j++){
 					for(k=Start_Col; k<Filter_Col+Start_Col; k++){
-						FIFO_Element[Element_Index] = input_fmap[i][j][k];
-						Element_Index++;
+						if(!AR1.ptr) cout << "AR1.ptr Error Occured" << "\n";
+						else *(AR1.ptr++) = input_fmap[i][j][k];
 					}
 				}
 			}
-			Element_Index = 0;
-			for(int n=0; n<Element_Size; n++) FIFO[FIFO_Index].push(FIFO_Element[n]);
-			FIFO_Index++;
+			FIFO.push(AR1);
+			// Reset AR1
+			AR1 = AR AR2(Element_Size);
 		}
 	}
-
 }
 
 void Unified_Buffer::QueueClear(){
