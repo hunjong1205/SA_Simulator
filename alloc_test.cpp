@@ -3,13 +3,14 @@
 
 using namespace std;
 
-typedef class AR{
+typedef struct AR{
 	public:
 		int * ptr;
 
 		AR(int size) 
 		{
 			ptr = new int[size];
+			cout <<" Constructor Called \n";
 		};
 
 		void reset(int num)
@@ -19,29 +20,36 @@ typedef class AR{
 
 		~AR()
 		{
-			delete[] ptr;
-			cout << "~AR() called \n";
+			if(ptr != NULL){
+				cout << " delete[] ptr \n";
+				delete[] ptr;
+			}
+			else {
+				cout << " ptr 존재 안함 \n";
+			}
 		};
 };
 
 int main(){
 
-	queue<AR> *FIFO;
+	queue<AR> FIFO;
 
-	FIFO = new queue<AR>;
+//	FIFO = new queue<AR>;
 
 	AR AR1(5);
 
 	for(int i=0; i<5; i++){ *(AR1.ptr + i) = 1;}
 
-	FIFO -> push(AR1);
-
-	FIFO -> pop();
+	FIFO.push(AR1);
 
 	cout << "FIFO -> pop() called \n";
 
-	delete FIFO;
-	FIFO = nullptr;
+	FIFO.pop();
+
+//	cout << "FIFO Deleted \n";
+
+//	delete FIFO;
+//	FIFO = nullptr;
 	return 0;
 
 	/*
