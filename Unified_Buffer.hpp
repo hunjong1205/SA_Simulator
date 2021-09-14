@@ -8,16 +8,16 @@ typedef struct AR{
 	public:
 		int *ptr;
 
-		AR(int Filter_Size) : 
+		AR(int Filter_Size) 
 		{
 			ptr = new int[Filter_Size];
 		}
 
-		void reset(int Element_Size):
+		void reset(int Element_Size)
 		{
 			ptr = new int[Element_Size];
 		}
-		~AR() :
+		~AR()
 		{
 			if(ptr) delete[] ptr;
 		}
@@ -112,6 +112,7 @@ void Unified_Buffer::QueueClear(){
 }
 
 int* Unified_Buffer::QueuetoPE(){
+	// while(!FIFO -> empty()) 방식으로 추가?
 	AR tmp_AR = FIFO -> front();
 	int* tmp_ptr = new int[_msize(tmp_AR.ptr)/sizeof(int)];
 	memcpy(tmp_ptr, tmp_AR.ptr, _msize(tmp_AR.ptr)/sizeof(int));
