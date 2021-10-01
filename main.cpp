@@ -56,6 +56,9 @@ int main() {
 	/*********************** PE    ***************************/
 	MXU MXU1();
 
+	/*********************** Accumulators ********************/
+	Accumulator Acc1();
+
 	/*********************** IFMAP ***************************/
 	// Input Array Structure to Unified Buffer(DRAM -> Unified Buffer) 
 	Unified_Buffer UB1(DRAM_Input_fmap, Channel, Input_fmap_Row, Input_fmap_Col);
@@ -76,6 +79,7 @@ int main() {
 	
 
 
+	int* PSUM = new int[256];
 	int Unified_Buffer_Index = 0;
 
 	// PE execution(Push_PE_Input_fmap)
@@ -89,8 +93,16 @@ int main() {
 		MXU1.MAC(PE_Col);
 
 		// 3. Accumulate Partial_Sum
-	++Cycle;
+		MXU1.Get_MXU_Partial_Sum(PSUM);
+		Acc1.Add_partialsum(PSUM, 256);
+
+		++Cycle;
 	}
+
+	delete PSUM;
 
 
 	// PE's All Partial Sum to Unified Buffer
+	UB1.Accumulator_to_Unified_Buffer(Acc1.Get_Psum_ptr(), Acc1.Get_Accumulator_Size());
+
+}

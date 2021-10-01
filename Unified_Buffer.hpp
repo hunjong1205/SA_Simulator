@@ -44,14 +44,25 @@ class Unified_Buffer {
 		int Input_fmap_Col;
 		int Strides;
 		int Element_Size;
-		queue<AR> *FIFO;
+		//queue<AR> *FIFO;
 		queue<int> *IFMAP_FIFO;
+		int *Accumulator_Psum;
+		int Acc_Size;
 		
 
 	public:
+		Unified_Buffer(){
+		Acc_Size = 0;
+		}
+
+		~Unified_Buffer(){
+		if(Accumulator_Psum) delete Accumulator_Psum;
+		}
+
 		void QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel);
 		void QueueClear();
 		void QueuetoPE();
+		void Accumulator_to_Unified_Buffer(const int* ptr, const int Size);
 };
 
 void Unified_Buffer::QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel){
@@ -147,4 +158,21 @@ void Unified_Buffer::QueueClear(){
 	*/
 	delete[] IFMAP_FIFO;
 	IFMAP_FIFO = nullptr;
+}
+
+void Unified_Buffer::Accumulator_to_Unified_Buffer(const int* ptr, const int Size)
+{
+	int* temp = new int[Size];
+
+	if(Accumulator_Psum){
+	for(int i=0; i<Acc_Size; i++)
+		temp[i] = Accumulator_Psum[i];
+	}
+
+	Accumulator_Psum = temp;
+
+	for(int k=0; k<Size; k++)
+		Accumulator_Psum[Acc_Size] = ptr[k];
+
+	Acc_Size += Size;
 }

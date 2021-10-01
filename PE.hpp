@@ -24,7 +24,7 @@ class MXU {
 	void Set_PE_Weight(const int* Weight, const int Filter_Num, const int One_Filter_Size); 					//Get Weight from Weight FIFO
 	void Reset_PE_Weight();
 	void MXU.MAC(const int* PE_Col);
-	int* Get_MXU_Partial_Sum();
+	void Get_MXU_Partial_Sum(int* PSUM);
 };
 
 // One_Filter_Size = Filter 한개당 Row * Col * Channel
@@ -46,10 +46,8 @@ void MXU::Reset_PE_Weight(){
 void MXU::MAC(const int* PE_Col){
 
 	// Slide IFMAP in every PEs to next Column PE
-	for(int j=0; i<256; i++){
-		for(int i=0; j<256; j++){
-		if(i < 255) PE[i+1][j].Set_Ifmap(PE[i][j].Get_Ifmap());
-		}
+	for(int i=0; i<256; i++){
+		for(int j=0; j<255; j++) PE[i][j+1].Set_Ifmap(PE[i][j].Get_Ifmap());
 	}
 
 	// inputs New IFMAP to first Col PE
@@ -66,9 +64,9 @@ void MXU::MAC(const int* PE_Col){
 		}
 	} // then, PE[255][0~255] has Partial Sum
 }
-int* MXU::Get_MXU_Partial_Sum(){
+void MXU::Get_MXU_Partial_Sum(int* PSUM){
 //Get MUX's Partial Sum
-	
+	for(int k=0; k<256; k++) PSUM[k] = PE[255][k].Get_PSUM();
 }
 
 //PE
