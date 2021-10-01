@@ -55,9 +55,9 @@ void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, 
 					if(!AR2.ptr) cout << "AR2.ptr Error Occured!" << "\n";
 					else *(AR2.ptr + ptr_index++) = Weight[m][c][k][j];
 				}
-			FIFO -> push(AR2);
-			// Reset AR2
-			AR2.reset(Weight_fmap_Num);
+				FIFO -> push(AR2);
+				// Reset AR2
+				AR2.reset(Weight_fmap_Num);
 			}
 		}
 	}
@@ -77,20 +77,14 @@ void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, 
 
 void Weight_FIFO::FIFOClear(){
 	// Delete FIFO AR
-	while(!(FIFO -> empty())){
-   		delete[] FIFO -> front().ptr;
-		FIFO -> front().ptr = nullptr;
-		FIFO -> pop();
-	}
+	while(!(FIFO -> empty())) FIFO -> pop();
 	delete FIFO;
 	FIFO = nullptr;
 }
 
 int* Weight_FIFO::FIFOtoPE(){
-	AR tmp_AR = FIFO -> front();
-	int* tmp_ptr = new int[_msize(tmp_AR.ptr)/sizeof(int)];
-	memcpy(tmp_ptr, tmp_AR.ptr, _msize(tmp_AR.ptr)/sizeof(int));
-	delete[] tmp_AR.ptr;
+	int* tmp_ptr = new int[FIFO -> front().Size];
+	memcpy(tmp_ptr, FIFO -> front().ptr, FIFO -> front().Size);
 	FIFO -> pop();
 	return tmp_ptr;
 }

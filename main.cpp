@@ -45,32 +45,52 @@ int main() {
 	int Input_fmap_Row;
 	int Input_fmap_Col;
 
+	int Cycle;
+	int* PE_Col;
 
 
 
+	PE_Col = new int[256];
 
 
+	/*********************** PE    ***************************/
+	MXU MXU1();
 
+	/*********************** IFMAP ***************************/
 	// Input Array Structure to Unified Buffer(DRAM -> Unified Buffer) 
 	Unified_Buffer UB1(DRAM_Input_fmap, Channel, Input_fmap_Row, Input_fmap_Col);
 
 	// Unified Buffer to Input_fmap Queue
 	UB1.QueueMapping();
 
-	
+	/*********************** Filter **************************/
 	//Weight Array Structure to Weight FIFO
 	Weight_FIFO WF1();
 	WF1.FIFOMapping(&DRAM_Weight_fmap, );
 
-
-	// Queue to PE(Both of Weight, Input fmap)
-
-
-
-
-	// PE execution
+	// Set_PE_Weight
+	MXU1.Set_PE_Weight(WF1.FIFOtoPE());
 
 
 
+	
 
-	// PE Partial Sum to Unified Buffer
+
+	int Unified_Buffer_Index = 0;
+
+	// PE execution(Push_PE_Input_fmap)
+	while(1)
+	{
+
+		// 1. Input fmap to PE
+		UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, Channel_Size);
+
+		// 2. PE MAC Operation
+		MXU1.MAC(PE_Col);
+
+		// 3. Accumulate Partial_Sum
+	++Cycle;
+	}
+
+
+	// PE's All Partial Sum to Unified Buffer

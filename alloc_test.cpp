@@ -1,17 +1,27 @@
 #include <iostream>
 #include <queue>
+#include <malloc.h>
 
 using namespace std;
 
 typedef struct AR{
 	public:
 		int * ptr;
+		int size;
 
 		AR(int size) 
 		{
 			ptr = new int[size];
+			this -> size = size;
 			cout <<" Constructor Called \n";
 		};
+
+		AR(const AR& AR_Origin)
+		{
+			cout << " Copy Constructor Called \n";
+			this -> ptr = new int[AR_Origin.size];
+			// memcpy
+		}
 
 		void reset(int num)
 		{
@@ -20,9 +30,10 @@ typedef struct AR{
 
 		~AR()
 		{
-			if(ptr != NULL){
+			if(ptr){
 				cout << " delete[] ptr \n";
 				delete[] ptr;
+				ptr = nullptr;
 			}
 			else {
 				cout << " ptr 존재 안함 \n";
@@ -40,12 +51,14 @@ int main(){
 
 	for(int i=0; i<5; i++){ *(AR1.ptr + i) = 1;}
 
+	// Call Copy constructor
 	FIFO.push(AR1);
 
 	cout << "FIFO -> pop() called \n";
 
 	FIFO.pop();
 
+	cout << "test \n";
 //	cout << "FIFO Deleted \n";
 
 //	delete FIFO;
