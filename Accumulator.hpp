@@ -9,13 +9,12 @@ class Accumulator {
 
 	public:
 	Accumulator(){
-	
 	Acc_Size = 0;
-	
 	}
 	~Accumulator(){
-	if(Psum_Accumulate) delete Psum_Accumulate;
+	if(Psum_Accumulate) delete[] Psum_Accumulate;
 	}
+
 	void Add_partialSum(const int* PSUM, const int Row_Size);
 	int Get_Accumulator_Size();
 	int* Get_Psum_ptr();

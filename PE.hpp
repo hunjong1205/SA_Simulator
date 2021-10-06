@@ -9,21 +9,21 @@ class MXU {
 
 	public:
 	MXU(){
-		Unit = new PE*[256];
-		for(int i=0 ; i<256; i++) Unit[i] = new PE[256];
+		PEs = new PE*[256];
+		for(int i=0 ; i<256; i++) PEs[i] = new PE[256];
 		cout <<"\n" << "PE[256 * 256] Generated \n" << "\n";
 	}
 	
 	~MXU(){
-		if(Unit){
-		for(int i=0; i<256; i++) delete[] PE[i];
-		delete[] PE;
+		if(PEs){
+		for(int i=0; i<256; i++) delete[] PEs[i];
+		delete[] PEs;
 		}
 	}
 
 	void Set_PE_Weight(const int* Weight, const int Filter_Num, const int One_Filter_Size); 					//Get Weight from Weight FIFO
 	void Reset_PE_Weight();
-	void MXU.MAC(const int* PE_Col);
+	void MAC(const int* PE_Col);
 	void Get_MXU_Partial_Sum(int* PSUM);
 };
 
@@ -34,6 +34,8 @@ void MXU::Set_PE_Weight(const int* Weight, const int Filter_Num, const int One_F
 		for(int j = 0; j < Filter_Num; j++)
 			PEs[k][j].Set_Scratchpad(Weight[Weight_index++]);
 	}
+
+	cout << "PE's Weight are configured! \n";
 }
 
 void MXU::Reset_PE_Weight(){
@@ -63,6 +65,8 @@ void MXU::MAC(const int* PE_Col){
 			else PE[m][n].MAC(PE[m-1][n].Get_PSUM());
 		}
 	} // then, PE[255][0~255] has Partial Sum
+
+	cout << "MAC Operation is Done! \n";
 }
 void MXU::Get_MXU_Partial_Sum(int* PSUM){
 //Get MUX's Partial Sum
@@ -81,6 +85,7 @@ class PE {
 	PE(){
 		this -> Scratchpad = 0;
 		this -> IFMAP = 0;
+		this -> PSUM = 0;
 	}
 	int Get_Ifmap(){ return IFMAP;};
 	int Set_Ifmap(int IFMAP) { this-> IFMAP = IFMAP; };

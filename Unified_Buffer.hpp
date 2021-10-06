@@ -80,45 +80,37 @@ void Unified_Buffer::QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_R
 	}
 
 	// DRAM -> Unified_Buffer
-	memcpy(input_fmap, DRAM_input_fmap, sizeof(input_fmap) * Input_fmap_Row * Input_fmap_Col);
+	memcpy(input_fmap, DRAM_input_fmap, sizeof(input_fmap) * Input_fmap_Row * Input_fmap_Col * Channel);
+
+	cout<< "Input fmap transferred from DRAM to Unified Buffer \n";
 		
 	int Start_Col= 0;
 	int Start_Row= 0;
-	int FIFO_Element[Element_Size];
 	int Element_Index = 0;
 	Element_Size = Filter_Channel * Filter_Row * Filter_Col;
 
-	// Struct Construct
-	AR AR1(Element_Size);
-
 	// Malloc Queue Size, It Needs QueueClear essentially!
-	this -> FIFO = new queue<AR>;
+	// this -> FIFO = new queue<AR>;
 	
 	// Malloc Queue Size, It Needs QueueClear essentially!
 	this -> IFMAP_FIFO = new queue<int>[Element_Size];
 
 	// Unified_Buffer to Input_Queue(Systolic_Data Setup)
-	int ptr_index;
 	for(int Start_Row=0; Start_Row<input_fmap_Row-Filter_Row+1; Start_Row++){
 		for(int Start_Col=0; Start_Col<input_fmap_Col-Filter_Col+1; Start_Col++){
-			// ptr_index = 0;
 			Element_Index = Element_Size;
 			for(int j=Start_Row; j<Filter_Row+Start_Row; j++){
 				for(int k=Start_Col; k<Filter_Col+Start_Col; k++){
 					for(int i=0; i<Filter_Channel; i++){
-						// if(!AR1.ptr) cout << "AR1.ptr Error Occured" << "\n";
-						else {
-						// *(AR1.ptr + ptr_index++) = input_fmap[i][j][k];
+						if(Element_Index < 0) // Index Error occured!
 						IFMAP_FIFO[Element_Index--].push(input_fmap[i][j][k]);
-						}
 					}
 				}
 			}
-			// FIFO -> push(AR1);
-			// Reset AR1
-			// AR1.reset(Element_Size);
 		}
 	}
+
+	cout<< "Input fmap Unified_Buffer to Input_Queue Done! \n";
 
 	// Memory Deallocation of input_fmap
 	for(int i=0; i<Channel; i++){
@@ -147,6 +139,7 @@ void Unified_Buffer::QueuetoPE(int Cycle, int* PE_Col, int Channel_Size){
 		PE_Col[i] =	IFMAP_FIFO[i].front();		
 		IFMAP_FIFO[i].pop();
 	}	
+	cout<< Cycle_tmp <<" cycle is done \n"
 }
 
 void Unified_Buffer::QueueClear(){

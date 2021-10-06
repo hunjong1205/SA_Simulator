@@ -33,19 +33,19 @@ void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, 
 
 	// DRAM -> Weight_FIFO
 	int Weight_Size = Weight_fmap_Num * Weight_fmap_Channel * Weight_fmap_Row * Weight_fmap_Col;
-	memcpy(Weight, DRAM_Weight_fmap, sizeof(Weight) * Weight_fmap_Channel * Weight_fmap_Row * Weight_fmap_Col);
+	memcpy(Weight, DRAM_Weight_fmap, sizeof(Weight) * Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel * Weight_fmap_Num);
 	// copy(DRAM_Weight_fmap, DRAM_Weight_fmap + Weight_Size, Weight);
+
+	cout<< "Weight fmap transferred from DRAM to Unified Buffer \n";
 
 	// DRAM -> FIFO 로 바로 넣는 방법도 가능함(아래 for문에서 DRAM_Weight_Fmap에서 AR2로 뽑아서 바로 FIFO에 넣을수 있음)
 	// 현재는 DRAM(Off-Chip Memory) -> Weight_FIFO(On-Chip Memory 구현을 모방하기 위해 memcpy 사용함
 
-	// Struct Construct
-	AR AR2(Weight_fmap_Num);
-
 	// Malloc FIFO Size, It Needs FIFOClear essentially!
-	this -> FIFO = new queue<AR>;
+	// this -> FIFO = new queue<AR>;
 
 	// Weight_FIFO to Weight_FIFO Queue
+	//*
 	int ptr_index;
 	for(int c=0; c<Weight_fmap_Channel; c++){         // 3
 		for(int k=0; k<Weight_Filter_Row; k++){          // 3
@@ -72,6 +72,7 @@ void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, 
 		}
 		delete[] Weight[m];
 	}
+	Weight = nullptr;
 
 }
 
