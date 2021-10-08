@@ -11,7 +11,7 @@ void main() {
 
 	// Input Structure Variable
 	int DRAM_Input_fmap [a][b][c];
-	int DRAM_Weight_fmap [m][a][b][c];
+	int DRAM_Weight_fmap [m][a][b][c]; // m : Num, a : Channel, b : Col, c : Row
 	int Channel;
 	int Input_fmap_Row;
 	int Input_fmap_Col;
@@ -20,9 +20,10 @@ void main() {
 	int Filter_Col;
 	int Filter_Channel;
 	int Filter_Num;
+	int One_Filter_Size = Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel;
 
 	// Simulator Variable
-	int Cycle;
+	int Cycle = 0;
 	int* PE_Col = new int[256];
 
 
@@ -43,23 +44,18 @@ void main() {
 
 	/*********************** IFMAP ***************************/
 	// Input Array Structure to Unified Buffer(DRAM -> Unified Buffer) 
-	Unified_Buffer UB1();
+	Unified_Buffer UB1(DRAM_Input_fmap, Input_fmap_Row, Input_fmap_Col, Strides, Filter_Row, Filter_Col, Filter_Channel);
 
 	// Unified Buffer to Input_fmap Queue
-	UB1.QueueMapping(DRAM_Input_fmap, Input_fmap_Row, Input_fmap_Col, Strides, Filter_Row, Filter_Col, Filter_Channel);
+	UB1.QueueMapping();
 
 	/*********************** Filter **************************/
 	//Weight Array Structure to Weight FIFO
-	Weight_FIFO WF1();
-	WF1.FIFOMapping(&DRAM_Weight_fmap, Filter_Row, Filter_Col, Filter_Num, Filter_Channel);
+	Weight_FIFO WF1(&DRAM_Weight_fmap, Filter_Row, Filter_Col, Filter_Num, Filter_Channel);
+	WF1.FIFOMapping();
 
-	// Set_PE_Weight
+	// Set_PE_Weight	
 	MXU1.Set_PE_Weight(WF1.FIFOtoPE(), Filter_Num, Filter_Row * Filter_Col * Filter_Channel);
-
-
-
-	
-
 
 	int* PSUM = new int[256];
 	int Unified_Buffer_Index = 0;
@@ -77,7 +73,7 @@ void main() {
 		MXU1.MAC(PE_Col);
 
 		// 3. Accumulate Partial_Sum
-		MXU1.Get_MXU_Partial_Sum(PSUM);
+		MXU1.Get_MXU_Partial_Sum(&PSUM);
 		Acc1.Add_partialsum(PSUM, 256);
 
 		++Cycle;
@@ -90,4 +86,5 @@ void main() {
 	// PE's All Partial Sum to Unified Buffer
 	UB1.Accumulator_to_Unified_Buffer(Acc1.Get_Psum_ptr(), Acc1.Get_Accumulator_Size());
 
+	retrun 0;
 }

@@ -4,6 +4,7 @@
 
 using namespace std;
 
+/*
 typedef struct AR{
 	public:
 		int *ptr;
@@ -33,7 +34,7 @@ typedef struct AR{
 			}
 		}
 };
-
+*/
 
 
 class Unified_Buffer {
@@ -51,43 +52,49 @@ class Unified_Buffer {
 		
 
 	public:
-		Unified_Buffer(){
-		Acc_Size = 0;
-		}
+		Unified_Buffer(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel);
 
 		~Unified_Buffer(){
 		if(Accumulator_Psum) delete Accumulator_Psum;
 		}
 
-		void QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel);
+		void QueueMapping();
 		void QueueClear();
-		void QueuetoPE();
+		void QueuetoPE(int Cycle, int* PE_Col, int Channel_Size);
 		void Accumulator_to_Unified_Buffer(const int* ptr, const int Size);
 };
 
-void Unified_Buffer::QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel){
-
-	this -> Input_fmap_Row = Input_fmap_Row;
-	this -> Input_fmap_Col = Input_fmap_Col;
-	this -> Channel = Filter_Channel;
-	this -> Strides = Strides;
-	input_fmap = new int **[Channel];
-
-	// Input_fmap Memory Allocation to DRAM
-	for(int i=0; i<Channel; i++){
-		input_fmap[i] = new int * [Input_fmap_Row];
-		for(int j=0; j<Input_fmap_Row; j++) input_fmap[i][j] = new int [Input_fmap_Col];
-	}
-
-	// DRAM -> Unified_Buffer
-	memcpy(input_fmap, DRAM_input_fmap, sizeof(input_fmap) * Input_fmap_Row * Input_fmap_Col * Channel);
-
-	cout<< "Input fmap transferred from DRAM to Unified Buffer \n";
+Unified_Buffer::Unified_Buffer(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel){
+		this -> Input_fmap_Row = Input_fmap_Row;
+		this -> Input_fmap_Col = Input_fmap_Col;
+		this -> Channel = Filter_Channel;
+		this -> Strides = Strides;
+		this -> Element_Size = Filter_Channel * Filter_Row * Filter_Col;
+		this -> Acc_Size = 0;
+		input_fmap = new int **[Channel];
 		
+
+		// Input_fmap Memory Allocation to DRAM
+		for(int i=0; i<Channel; i++){
+			input_fmap[i] = new int * [Input_fmap_Row];
+			for(int j=0; j<Input_fmap_Row; j++) input_fmap[i][j] = new int [Input_fmap_Col];
+		}
+
+		// DRAM -> Unified_Buffer
+		if(memcpy(input_fmap, DRAM_input_fmap, sizeof(DRAM_input_fmap) != input_fmap)
+		{
+			cout<< "Memcpy Error occured! \n";
+		}
+
+		cout<< "Input fmap transferred from DRAM to Unified Buffer \n";
+			
+}
+
+void Unified_Buffer::QueueMapping(){
 	int Start_Col= 0;
 	int Start_Row= 0;
 	int Element_Index = 0;
-	Element_Size = Filter_Channel * Filter_Row * Filter_Col;
+	Acc_Size = 0;
 
 	// Malloc Queue Size, It Needs QueueClear essentially!
 	// this -> FIFO = new queue<AR>;
@@ -143,12 +150,6 @@ void Unified_Buffer::QueuetoPE(int Cycle, int* PE_Col, int Channel_Size){
 }
 
 void Unified_Buffer::QueueClear(){
-	// Delete FIFO AR
-	/*	
-	while(!(FIFO -> empty())) FIFO -> pop();
-	delete FIFO;
-	FIFO = nullptr;
-	*/
 	delete[] IFMAP_FIFO;
 	IFMAP_FIFO = nullptr;
 }

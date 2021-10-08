@@ -26,7 +26,7 @@ void Accumulator::Add_PartialSum(const int* PSUM, const int Row_Size){
 	for(int k=0; k<Acc_Size; k++)
 		temp[k] = Psum_Accumulate[k];
 
-	delete Psum_Accumulate;
+	delete[] Psum_Accumulate;
 
 	Psum_Accumulate = temp;	
 

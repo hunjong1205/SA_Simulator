@@ -21,19 +21,24 @@ class MXU {
 		}
 	}
 
-	void Set_PE_Weight(const int* Weight, const int Filter_Num, const int One_Filter_Size); 					//Get Weight from Weight FIFO
+	void Set_PE_Weight(const int** Weight, const int Filter_Num, const int One_Filter_Size); 					//Get Weight from Weight FIFO
 	void Reset_PE_Weight();
 	void MAC(const int* PE_Col);
 	void Get_MXU_Partial_Sum(int* PSUM);
 };
 
 // One_Filter_Size = Filter 한개당 Row * Col * Channel
-void MXU::Set_PE_Weight(const int* Weight, const int Filter_Num, const int One_Filter_Size){
-	int Weight_index = 0;
+void MXU::Set_PE_Weight(const int** Weight, const int Filter_Num, const int One_Filter_Size){
 	for(int k = 0; k < One_Filter_Size; k++){
 		for(int j = 0; j < Filter_Num; j++)
-			PEs[k][j].Set_Scratchpad(Weight[Weight_index++]);
+			PEs[k][j].Set_Scratchpad(Weight[k][j]);
 	}
+
+	for(int i = 0; i <One_Filter_Size; i++)
+		delete[] Weight[i];
+	delete[] Weight;
+
+	Weight = nullptr;
 
 	cout << "PE's Weight are configured! \n";
 }

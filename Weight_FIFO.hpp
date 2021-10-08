@@ -9,17 +9,31 @@ using namespace std;
 class Weight_FIFO {
 	private:
 		int ****Weight;
-		queue<AR> *FIFO;
+		int Weight_fmap_Row;
+		int Weight_fmap_Col;
+		int Weight_fmap_Num;
+		int Weight_fmap_Channel;
+		int Element_Size;
+		queue<int> *WFMAP_FIFO;
 
 	public:
+		Weight_FIFO();
+		~Weight_FIFO(){};
 		void FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel);
 		void FIFOClear();
 		int* FIFOtoPE();
 };
 
-void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel){
-	// Memory Allocation(sized for Weight)
+Weight_FIFO::Weight_FIFO(const int *DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel){
+	this -> Weight_fmap_Row = Weight_fmap_Row;
+	this -> Weight_fmap_Col = Weight_fmap_Col;
+	this -> Weight_fmap_Num = Weight_fmap_Num;
+	this -> Weight_fmap_Channel = Weight_fmap_Channel;
+	this -> Element_Size = Weight_fmap_Num;
+
+	// Weight_fmap Memory Allocation to DRAM
 	Weight = new int ***[Weight_fmap_Num];
+
 	for(int m=0; i<Weight_fmap_Num; m++)
 	{
 			Weight[m] = new **int[Weight_fmap_Channel];
@@ -31,9 +45,13 @@ void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, 
 			}
 	}
 
+
 	// DRAM -> Weight_FIFO
-	int Weight_Size = Weight_fmap_Num * Weight_fmap_Channel * Weight_fmap_Row * Weight_fmap_Col;
-	memcpy(Weight, DRAM_Weight_fmap, sizeof(Weight) * Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel * Weight_fmap_Num);
+	if(memcpy(Weight, DRAM_Weight_fmap, sizeof(Weight)) != Weight) 
+	{
+		cout<< "Memcpy Error occured! \n";
+	}
+
 	// copy(DRAM_Weight_fmap, DRAM_Weight_fmap + Weight_Size, Weight);
 
 	cout<< "Weight fmap transferred from DRAM to Unified Buffer \n";
@@ -41,26 +59,68 @@ void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, 
 	// DRAM -> FIFO 로 바로 넣는 방법도 가능함(아래 for문에서 DRAM_Weight_Fmap에서 AR2로 뽑아서 바로 FIFO에 넣을수 있음)
 	// 현재는 DRAM(Off-Chip Memory) -> Weight_FIFO(On-Chip Memory 구현을 모방하기 위해 memcpy 사용함
 
-	// Malloc FIFO Size, It Needs FIFOClear essentially!
+}
+
+void Weight_FIFO::FIFOMapping(){
+
+	// Malloc FIFO Size, It Needs FIFO Clear essentially!
 	// this -> FIFO = new queue<AR>;
 
+	// Malloc FIFO Size, It Needs FIFO Clear essentially!
+	this -> WFMAP_FIFO = new queue<int>[Element_Size];
+
 	// Weight_FIFO to Weight_FIFO Queue
-	//*
-	int ptr_index;
-	for(int c=0; c<Weight_fmap_Channel; c++){         // 3
-		for(int k=0; k<Weight_Filter_Row; k++){          // 3
-			for(int j=0; j<Weight_Filter_Col; j++){       // 3
-				ptr_index = 0;
-				for(int m=0; m<Weight_fmap_Num; m++){	  // m
-					if(!AR2.ptr) cout << "AR2.ptr Error Occured!" << "\n";
-					else *(AR2.ptr + ptr_index++) = Weight[m][c][k][j];
+	/*
+	int Element_Index = 0;
+	for(int i=0; i<Weight_fmap_Num; i++){
+		for(int j=0; j<Weight_fmap_Row; j++){
+			for(int k=0; k<Weight_fmap_Col; k++){
+				for(int m=0; m<Weight_fmap_Channel; m++){
+					WFMAP_FIFO[Element_Index].push(Weight[i][m][k][j]);
 				}
-				FIFO -> push(AR2);
-				// Reset AR2
-				AR2.reset(Weight_fmap_Num);
+			}
+		}
+		Element_Index++;
+	}
+	*/
+
+
+}
+
+int& Weight_FIFO::FIFOtoPE(){
+	/*
+	int tmp_array[Element_Size]; 
+	for(int i = 0; i<Element_Size; i++){
+		if(!WFMAP_FIFO[i].empty()){
+		tmp_ptr[i] = WFMAP_FIFO[i].front();
+		WFMAP_FIFO[i].pop();
+		}
+		else cout << "WFMAP_FIFO[%d] is empty" << i << "\n";
+
+	}
+	*/
+	int One_Filter_Size = Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel;
+
+	// Allocate temporal Weight Bus, Deallocate in MXU::Set_PE_Weight
+	int **tmp = new int*[One_Filter_Size];
+	for(int i=0; i<One_Filter_Size; i++)
+		tmp[i] = new int[Weight_fmap_Num];
+
+	for(int i=0; i<Weight_fmap_Num; i++){
+		for(int c=0; c<Weight_fmap_Row; c++){
+			for(int b=0; b<Weight_fmap_Col; b++){
+				for(int a=0; a<Weight_fmap_Channel; a++){
+					tmp[One_Filter_Size - (a + b + c)][i] = Weight[i][a][b][c];
+				}
 			}
 		}
 	}
+
+	return tmp;
+
+}
+
+void Weight_FIFO::FIFOClear(){
 
 	// Memory Deallocation
 	for(int m=0; m<Weight_fmap_Num; m++)
@@ -72,20 +132,11 @@ void Weight_FIFO::FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, 
 		}
 		delete[] Weight[m];
 	}
+
+	delete[] Weight;
 	Weight = nullptr;
 
+	delete[] WFMAP_FIFO;
+	WFMAP_FIFO = nullptr;
 }
 
-void Weight_FIFO::FIFOClear(){
-	// Delete FIFO AR
-	while(!(FIFO -> empty())) FIFO -> pop();
-	delete FIFO;
-	FIFO = nullptr;
-}
-
-int* Weight_FIFO::FIFOtoPE(){
-	int* tmp_ptr = new int[FIFO -> front().Size];
-	memcpy(tmp_ptr, FIFO -> front().ptr, FIFO -> front().Size);
-	FIFO -> pop();
-	return tmp_ptr;
-}
