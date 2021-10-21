@@ -3,6 +3,7 @@
 #include "Unified_Buffer.hpp"
 #include "Weight_FIFO.hpp"
 #include "Accumulator.hpp"
+#include "ReadMNIST.hpp"
 
 using namespace std;
 
@@ -21,6 +22,9 @@ void main() {
 	int Filter_Channel;
 	int Filter_Num;
 	int One_Filter_Size = Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel;
+
+	// Input fmap Settings
+	Data(Input_fmap_Row, Input_fmap_Col, DRAM_Input_fmap);
 
 	// Simulator Variable
 	int Cycle = 0;
