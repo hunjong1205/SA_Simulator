@@ -8,13 +8,13 @@ int ReverseInt(int i);
 void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr);
 void ReadMNISTLabel(vector<unsigned char> &arr);
  
-void Data(int &Row, int &Col, int &Input_fmap)
+void Data(int &Input_fmap)
 {
     vector<vector<double>> ai;
     vector<unsigned char> al;
-    ReadMNIST(10000, 784, ai);                // 훈련데이터를 불러옴
+    ReadMNIST(10000, 784, ai, Input_fmap);                // 훈련데이터를 불러옴
 //    ReadMNISTLabel(al);                        // 레이블을 읽어 옴
-	for(int k = 0; k<100; k++){
+/*	for(int k = 0; k<100; k++){
 			for(int i = 0; i < 28; i++){
 				for(int j = 0; j < 28; j++){
 				cout << ai[k][i*28 + j] <<' ';
@@ -24,6 +24,7 @@ void Data(int &Row, int &Col, int &Input_fmap)
 	}
 	cout << "vector ai size : " << ai.size() << endl;
 	cout << "vector ai[0] size : " << ai[0].size() << endl;
+*/
  
     return 0;
 }
@@ -38,7 +39,7 @@ int ReverseInt(int i)
     ch4 = (i >> 24) & 255;
     return((int)ch1 << 24) + ((int)ch2 << 16) + ((int)ch3 << 8) + ch4;
 }
-void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr)   // MNIST데이터를 읽어온다.
+void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int& Input_fmap)   // MNIST데이터를 읽어온다.
 {
     arr.resize(NumberOfImages, vector<double>(DataOfAnImage));
     ifstream file("./t10k-images-idx3-ubyte", ios::binary);
@@ -69,6 +70,7 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &ar
                     unsigned char temp = 0;
                     file.read((char*)&temp, sizeof(temp));
                     arr[i][(n_rows*r) + c] = (double)temp;
+					Input_fmap[i][0][c][r] = (int)temp;
                 }
             }
         }

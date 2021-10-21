@@ -11,7 +11,7 @@ void main() {
 	// Input, Weight Data to Array Structure, Global Variable Set
 
 	// Input Structure Variable
-	int DRAM_Input_fmap [a][b][c];
+	int DRAM_Input_fmap [10000][1][28][28];
 	int DRAM_Weight_fmap [m][a][b][c]; // m : Num, a : Channel, b : Col, c : Row
 	int Channel;
 	int Input_fmap_Row;
@@ -24,7 +24,9 @@ void main() {
 	int One_Filter_Size = Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel;
 
 	// Input fmap Settings
-	Data(Input_fmap_Row, Input_fmap_Col, DRAM_Input_fmap);
+	Data(DRAM_Input_fmap);
+
+	// Wegiht fmap Settings?
 
 	// Simulator Variable
 	int Cycle = 0;
