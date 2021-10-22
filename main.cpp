@@ -12,6 +12,7 @@ void main() {
 
 	// Input Structure Variable
 	int DRAM_Input_fmap [10000][1][28][28];
+
 	int DRAM_Weight_fmap [m][a][b][c]; // m : Num, a : Channel, b : Col, c : Row
 	int Channel;
 	int Input_fmap_Row;
@@ -27,6 +28,7 @@ void main() {
 	Data(DRAM_Input_fmap);
 
 	// Wegiht fmap Settings?
+	// MNIST용 Weight Fmap Data
 
 	// Simulator Variable
 	int Cycle = 0;

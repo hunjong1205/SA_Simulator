@@ -2,6 +2,8 @@
 
 using namespace std;
 
+class PE;
+
 //MXU(includes PEs)
 class MXU {
 	private:
