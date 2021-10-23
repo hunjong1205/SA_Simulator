@@ -18,13 +18,13 @@ class Weight_FIFO {
 
 	public:
 		Weight_FIFO();
-		~Weight_FIFO(){};
-		void FIFOMapping(const int *DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel);
+		~Weight_FIFO(){ /* Add Deallocation Debugging */ };
+		void FIFOMapping(const int ****DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel);
+		int** FIFOtoPE(const int One_Filter_Size);
 		void FIFOClear();
-		int* FIFOtoPE();
 };
 
-Weight_FIFO::Weight_FIFO(const int *DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel){
+void Weight_FIFO::FIFOMapping(const int ****DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel){
 	this -> Weight_fmap_Row = Weight_fmap_Row;
 	this -> Weight_fmap_Col = Weight_fmap_Col;
 	this -> Weight_fmap_Num = Weight_fmap_Num;
@@ -32,16 +32,16 @@ Weight_FIFO::Weight_FIFO(const int *DRAM_Weight_fmap, int Weight_fmap_Row, int W
 	this -> Element_Size = Weight_fmap_Num;
 
 	// Weight_fmap Memory Allocation to DRAM
-	Weight = new int ***[Weight_fmap_Num];
+	Weight = new int *** [Weight_fmap_Num];
 
-	for(int m=0; i<Weight_fmap_Num; m++)
+	for(int m=0; m<Weight_fmap_Num; m++)
 	{
-			Weight[m] = new **int[Weight_fmap_Channel];
+			Weight[m] = new int ** [Weight_fmap_Channel];
 			for(int c=0; c<Weight_fmap_Channel; c++)
 			{
-				Weight[m][c] = new *int[Weight_fmap_Row];
-				for(int r=0; r<Weight_fmap_Row; r++)
-					Weight[m][c][r] = new int[Weight_fmap_Col];
+				Weight[m][c] = new int * [Weight_fmap_Col];
+				for(int r=0; r<Weight_fmap_Col; r++)
+					Weight[m][c][r] = new int[Weight_fmap_Row];
 			}
 	}
 
@@ -60,14 +60,14 @@ Weight_FIFO::Weight_FIFO(const int *DRAM_Weight_fmap, int Weight_fmap_Row, int W
 	// 현재는 DRAM(Off-Chip Memory) -> Weight_FIFO(On-Chip Memory 구현을 모방하기 위해 memcpy 사용함
 
 }
-
-void Weight_FIFO::FIFOMapping(){
+// void Weight_FIFO::FIFOMapping(){
+	// Replaced With Weight_FIFO constructor!
 
 	// Malloc FIFO Size, It Needs FIFO Clear essentially!
 	// this -> FIFO = new queue<AR>;
 
 	// Malloc FIFO Size, It Needs FIFO Clear essentially!
-	this -> WFMAP_FIFO = new queue<int>[Element_Size];
+	// this -> WFMAP_FIFO = new queue<int>[Element_Size];
 
 	// Weight_FIFO to Weight_FIFO Queue
 	/*
@@ -85,9 +85,9 @@ void Weight_FIFO::FIFOMapping(){
 	*/
 
 
-}
+//}
 
-int& Weight_FIFO::FIFOtoPE(){
+int** Weight_FIFO::FIFOtoPE(const int One_Filter_Size){
 	/*
 	int tmp_array[Element_Size]; 
 	for(int i = 0; i<Element_Size; i++){
@@ -99,12 +99,10 @@ int& Weight_FIFO::FIFOtoPE(){
 
 	}
 	*/
-	int One_Filter_Size = Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel;
 
 	// Allocate temporal Weight Bus, Deallocate in MXU::Set_PE_Weight
 	int **tmp = new int*[One_Filter_Size];
-	for(int i=0; i<One_Filter_Size; i++)
-		tmp[i] = new int[Weight_fmap_Num];
+	for(int i=0; i<One_Filter_Size; i++) tmp[i] = new int[Weight_fmap_Num];
 
 	for(int i=0; i<Weight_fmap_Num; i++){
 		for(int c=0; c<Weight_fmap_Row; c++){

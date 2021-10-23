@@ -2,7 +2,39 @@
 
 using namespace std;
 
-class PE;
+//PE
+class PE {
+	private: 
+	// Multiply, Add, ScratchPad
+	int Scratchpad;									// Store Weight
+	int IFMAP;
+	int PSUM;
+
+	public:
+	PE(){
+		this -> Scratchpad = 0;
+		this -> IFMAP = 0;
+		this -> PSUM = 0;
+	}
+	int Get_Ifmap(){ return IFMAP;};
+	int Set_Ifmap(int IFMAP) { this-> IFMAP = IFMAP; };
+	void MAC(int Pre_psum);  // Output Partial Sum
+	int Get_PSUM(){ return PSUM; };
+	void Reset_Scratchpad();
+	void Set_Scratchpad(int Weight);
+};
+
+void PE::MAC(int Pre_psum = 0){
+	PSUM = Scratchpad * IFMAP + Pre_psum;
+}
+
+void PE::Reset_Scratchpad(){
+	this -> Scratchpad = 0;	
+}
+
+void PE::Set_Scratchpad(int Weight){
+	this -> Scratchpad = Weight;	
+}
 
 //MXU(includes PEs)
 class MXU {
@@ -56,20 +88,20 @@ void MXU::MAC(const int* PE_Col){
 
 	// Slide IFMAP in every PEs to next Column PE
 	for(int i=0; i<256; i++){
-		for(int j=0; j<255; j++) PE[i][j+1].Set_Ifmap(PE[i][j].Get_Ifmap());
+		for(int j=0; j<255; j++) PEs[i][j+1].Set_Ifmap(PEs[i][j].Get_Ifmap());
 	}
 
 	// inputs New IFMAP to first Col PE
 	for(int k=0; k<256; k++)
-		PE[k][0].Set_Ifmap(PE_Col[k]);
+		PEs[k][0].Set_Ifmap(PE_Col[k]);
 
 	// MAC Operation
 	for(int m=0; m<256; m++){
 		for(int n=0; n<256; n++)
 		{
 			// Slide PSUM in every PEs to next Row PE
-			if(m == 0) PE[m][n].MAC();
-			else PE[m][n].MAC(PE[m-1][n].Get_PSUM());
+			if(m == 0) PEs[m][n].MAC();
+			else PEs[m][n].MAC(PEs[m-1][n].Get_PSUM());
 		}
 	} // then, PE[255][0~255] has Partial Sum
 
@@ -77,39 +109,6 @@ void MXU::MAC(const int* PE_Col){
 }
 void MXU::Get_MXU_Partial_Sum(int* PSUM){
 //Get MUX's Partial Sum
-	for(int k=0; k<256; k++) PSUM[k] = PE[255][k].Get_PSUM();
+	for(int k=0; k<256; k++) PSUM[k] = PEs[255][k].Get_PSUM();
 }
 
-//PE
-class PE {
-	private: 
-	// Multiply, Add, ScratchPad
-	int Scratchpad;									// Store Weight
-	int IFMAP;
-	int PSUM;
-
-	public:
-	PE(){
-		this -> Scratchpad = 0;
-		this -> IFMAP = 0;
-		this -> PSUM = 0;
-	}
-	int Get_Ifmap(){ return IFMAP;};
-	int Set_Ifmap(int IFMAP) { this-> IFMAP = IFMAP; };
-	void MAC(int Pre_psum = 0);  // Output Partial Sum
-	int Get_PSUM(){ return PSUM; };
-	void Reset_Scratchpad();
-	void Set_Scratchpad(int Weight);
-};
-
-void PE::MAC(int Pre_psum = 0){
-	PSUM = Scratchpad * IFMAP + Pre_psum;
-}
-
-void PE::Reset_Scratchpad(){
-	this -> Scratchpad = 0;	
-}
-
-void PE::Set_Scratchpad(int Weight){
-	this -> Scratchpad = Weight;	
-}

@@ -15,7 +15,7 @@ class Accumulator {
 	if(Psum_Accumulate) delete[] Psum_Accumulate;
 	}
 
-	void Add_partialSum(const int* PSUM, const int Row_Size);
+	void Add_PartialSum(const int* PSUM, const int Row_Size);
 	int Get_Accumulator_Size();
 	int* Get_Psum_ptr();
 };
@@ -37,12 +37,10 @@ void Accumulator::Add_PartialSum(const int* PSUM, const int Row_Size){
 		
 }
 
-int Accumulator::Get_Accumulator_Size();
-{
+int Accumulator::Get_Accumulator_Size(){
 	return Acc_Size;
 }
 
-int* Accumulator::Get_Psum_ptr();
-{
+int* Accumulator::Get_Psum_ptr(){
 	return this -> Psum_Accumulate;
 }

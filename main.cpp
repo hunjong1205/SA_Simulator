@@ -11,24 +11,11 @@ void main() {
 	// Input, Weight Data to Array Structure, Global Variable Set
 
 	// Input Structure Variable
-	int DRAM_Input_fmap [10000][1][28][28];
-
-	int DRAM_Weight_fmap [m][a][b][c]; // m : Num, a : Channel, b : Col, c : Row
-	int Channel;
-	int Input_fmap_Row;
-	int Input_fmap_Col;
-	int Strides;
-	int Filter_Row;
-	int Filter_Col;
-	int Filter_Channel;
-	int Filter_Num;
-	int One_Filter_Size = Weight_fmap_Row * Weight_fmap_Col * Weight_fmap_Channel;
-
-	// Input fmap Settings
-	Data(DRAM_Input_fmap);
-
-	// Wegiht fmap Settings?
-	// MNIST용 Weight Fmap Data
+	// Matrix fixed [Number][Channel][Row][Columm]
+	int All_DRAM_Input_fmap [10000][1][28][28]; // 10000 : # of input, 1 : Channel, 28 : Row, 28 : Col
+	int DRAM_Input_fmap [1][28][28]; 
+	int Input_fmap_Row_Size;
+	int Input_fmap_Col_Size;
 
 	// Simulator Variable
 	int Cycle = 0;
@@ -42,6 +29,23 @@ void main() {
 
 
 	cout << "Simulation Config Start \n";
+	
+	// Input fmap Settings, Filter fmap Settings
+	cout << "Configure Input feature map & Filter feature map start! \n";
+	
+	Data(DRAM_Input_fmap);
+		// Configure Filter from ML Library file
+		int DRAM_Weight_fmap [m][a][b][c]; // m : Num, a : Channel, b : Col, c : Row (?)
+		int Strides;
+		int Filter_Row_Size;
+		int Filter_Col_Size;
+		int Filter_Channel_Size;
+		int Filter_Num_Size;
+		int Channel_Size;
+
+		int One_Filter_Size = Filter_Row_Size * Filter_Col_Size * Filter_Channel_Size;
+		
+	cout << "Configured! \n";
 
 	//          1. Accelerator Configuration				 //
 	/*********************** PE    ***************************/
@@ -52,40 +56,53 @@ void main() {
 
 	/*********************** IFMAP ***************************/
 	// Input Array Structure to Unified Buffer(DRAM -> Unified Buffer) 
-	Unified_Buffer UB1(DRAM_Input_fmap, Input_fmap_Row, Input_fmap_Col, Strides, Filter_Row, Filter_Col, Filter_Channel);
-
-	// Unified Buffer to Input_fmap Queue
-	UB1.QueueMapping();
+	Unified_Buffer UB1();
 
 	/*********************** Filter **************************/
 	//Weight Array Structure to Weight FIFO
-	Weight_FIFO WF1(&DRAM_Weight_fmap, Filter_Row, Filter_Col, Filter_Num, Filter_Channel);
-	WF1.FIFOMapping();
+	Weight_FIFO WF1();
 
-	// Set_PE_Weight	
-	MXU1.Set_PE_Weight(WF1.FIFOtoPE(), Filter_Num, Filter_Row * Filter_Col * Filter_Channel);
 
 	int* PSUM = new int[256];
 	int Unified_Buffer_Index = 0;
+	int Input_Index_Number = 0;
 
 	cout << "Simulation Execution Start \n";
 	// PE execution(Push_PE_Input_fmap)
-	while(1)
+	while(Input_Index_Number < 1000)
 	{
 
-		// 1. Input fmap to PE
-		cout << "Start Input feature map Queue to PE \n"
-		UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, Channel_Size);	// Queue에 뒷부분에서 PE로 어떻게 전달되는지?
+		while(!UB1.QueueMapping) 으로 대체!
+		// 1. Unified Buffer to Input_fmap Queue
+		UB1.QueueMapping(DRAM_Input_fmap, Input_fmap_Row, Input_fmap_Col, Strides, Filter_Row, Filter_Col, Filter_Channel);
 
-		// 2. PE MAC Operation
+		// 2. Weight Array Structure to Weight FIFO
+		WF1.FIFOMapping(DRAM_Weight_fmap, Filter_Row, Filter_Col, Filter_Num, Filter_Channel);
+
+		// 3. Set_PE_Weight
+		MXU1.Set_PE_Weight(WF1.FIFOtoPE(One_Filter_Size), Filter_Num, One_Filter_Size);
+
+		cout << "Start Input feature map Queue to PE \n"
+
+		// Input fmap to PE
+		// Get Input fmap data using PE_Col
+		for()
+		(*) UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, One_Filter_Size);	// Queue에 뒷부분에서 PE로 어떻게 전달되는지?
+
+		// 5. PE MAC Operation
 		MXU1.MAC(PE_Col);
 
-		// 3. Accumulate Partial_Sum
+		// 6. Accumulate Partial_Sum
 		MXU1.Get_MXU_Partial_Sum(&PSUM);
 		Acc1.Add_partialsum(PSUM, 256);
 
 		++Cycle;
+		++Input_Index_Number;
+		// UB1 Deallocation
+
 	}
+
+	// WF1 Deallocation
 
 	delete[] PSUM;
 	delete[] PE_Col;
