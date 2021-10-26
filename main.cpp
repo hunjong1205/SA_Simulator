@@ -12,8 +12,8 @@ void main() {
 
 	// Input Structure Variable
 	// Matrix fixed [Number][Channel][Row][Columm]
-	int All_DRAM_Input_fmap [10000][1][28][28]; // 10000 : # of input, 1 : Channel, 28 : Row, 28 : Col
-	int DRAM_Input_fmap [1][28][28]; 
+	int DRAM_Input_fmap [10000][1][28][28]; // 10000 : # of input, 1 : Channel, 28 : Row, 28 : Col
+ // int DRAM_Input_fmap [1][28][28]; 
 	int Input_fmap_Row_Size;
 	int Input_fmap_Col_Size;
 
@@ -69,12 +69,12 @@ void main() {
 
 	cout << "Simulation Execution Start \n";
 	// PE execution(Push_PE_Input_fmap)
-	while(Input_Index_Number < 1000)
+	while(Input_Index_Number < 10000)
 	{
 
 		while(!UB1.QueueMapping) 으로 대체!
 		// 1. Unified Buffer to Input_fmap Queue
-		UB1.QueueMapping(DRAM_Input_fmap, Input_fmap_Row, Input_fmap_Col, Strides, Filter_Row, Filter_Col, Filter_Channel);
+		UB1.QueueMapping(&DRAM_Input_fmap[Input_Index_Number][0][0][0], Input_fmap_Row, Input_fmap_Col, Strides, Filter_Row, Filter_Col, Filter_Channel);
 
 		// 2. Weight Array Structure to Weight FIFO
 		WF1.FIFOMapping(DRAM_Weight_fmap, Filter_Row, Filter_Col, Filter_Num, Filter_Channel);
@@ -113,3 +113,5 @@ void main() {
 
 	retrun 0;
 }
+
+// Input, Weight featuremap information -> Struct
