@@ -1,8 +1,9 @@
 #include <iostream>
+#include <typeinfo>
 
 using namespace std;
 
-void func_call(int ****DRAM);
+void func_call(const int DRAM[1][28][28]);
 
 int main()
 {
@@ -22,26 +23,24 @@ int main()
 	cout << '\n';
 	}
 
-	cout << "func_call start!" << endl;
+//	cout << "func_call start!" << endl;
 
-	func_call(DRAM);
+	cout << "DRAM[0][0][0][0] type is : " << typeid((int [][28][28])DRAM[1][0][0][0]).name() << endl;
+
+// 	func_call((int [1][28][28])&DRAM[0][0][0][0]);
 
 	return 0;
 }	
 
-void func_call(int ****DRAM){
-	int ****tmp;
+void func_call(const int DRAM[1][28][28]){
 
-	tmp = DRAM;
-	for(int i=0; i<2; i++){
 		for(int j =0; j<1; j++){
 			for(int k=0; k<28; k++){
-				for(int m=0; m<28; m++) cout << tmp[i][j][k][m] << ' ';
+				for(int m=0; m<28; m++) cout << DRAM[j][k][m] << ' ';
 				cout << '\n';
 			}
 			cout << '\n';
 		}
 		cout << '\n';
-	}
 
 }

@@ -10,7 +10,6 @@ class Unified_Buffer {
 		int Channel;
 		int Input_fmap_Row;
 		int Input_fmap_Col;
-		int Strides;
 		int Filter_Row;
 		int Filter_Col;
 		int Element_Size;
@@ -26,18 +25,17 @@ class Unified_Buffer {
 		if(Accumulator_Psum) delete Accumulator_Psum;
 		}
 
-		void QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel);
+		void QueueMapping(const int DRAM_input_fmap[][28][28], const int Input_Index, int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel);
 		void QueueClear();
 		void QueuetoPE(int Cycle, int* PE_Col, int One_Filter_Size);
 		void Accumulator_to_Unified_Buffer(const int* ptr, const int Size);
 };
 
 
-void Unified_Buffer::QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_Row, int Input_fmap_Col, int Strides, int Filter_Row, int Filter_Col, int Filter_Channel){
+void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[][28][28], const int Input_Index,int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel){
 	this -> Input_fmap_Row = Input_fmap_Row;
 	this -> Input_fmap_Col = Input_fmap_Col;
 	this -> Channel = Filter_Channel;
-	this -> Strides = Strides;
 	this -> Filter_Row = Filter_Row;
 	this -> Filter_Col = Filter_Col;
 	this -> Element_Size = Filter_Channel * Filter_Row * Filter_Col;
@@ -55,6 +53,7 @@ void Unified_Buffer::QueueMapping(const int ***DRAM_input_fmap, int Input_fmap_R
 	if(memcpy(input_fmap, DRAM_input_fmap, sizeof(DRAM_input_fmap)) != input_fmap)
 	{
 		cout<< "Memcpy Error occured! \n";
+		exit(EXIT_FAILURE);
 	}
 
 	cout<< "Input fmap transferred from DRAM to Unified Buffer \n";
