@@ -9,18 +9,26 @@ class Accumulator {
 
 	public:
 	Accumulator(){
+	Psum_Accumulate = new int[256];
 	Acc_Size = 0;
+	for(int i = 0; i<256; i++) Psum_Accumulate[i] = 0;
 	}
 	~Accumulator(){
 	if(Psum_Accumulate) delete[] Psum_Accumulate;
 	}
 
-	void Add_PartialSum(const int* PSUM, const int Row_Size);
+	void Init_Accumulator();
+	void Add_PartialSum(const int* PSUM);
 	int Get_Accumulator_Size();
 	int* Get_Psum_ptr();
 };
 
-void Accumulator::Add_PartialSum(const int* PSUM, const int Row_Size){
+void Accumulator::Init_Accumulator(){
+	for(int i = 0; i<256; i++) Psum_Accumulate[i] = 0;
+}
+
+void Accumulator::Add_PartialSum(const int* PSUM){
+	/*
 	int* temp = new int[Acc_Size + Row_Size];
 
 	for(int k=0; k<Acc_Size; k++)
@@ -34,6 +42,11 @@ void Accumulator::Add_PartialSum(const int* PSUM, const int Row_Size){
 		Psum_Accumulate[Acc_Size + i] = PSUM[i];
 	
 	Acc_Size += Row_Size;	
+	*/
+	
+	//Accumulate Memory
+	for(int i=0; i<256; i++)
+		Psum_Accumulate[i] += PSUM[i];	
 		
 }
 
@@ -42,5 +55,5 @@ int Accumulator::Get_Accumulator_Size(){
 }
 
 int* Accumulator::Get_Psum_ptr(){
-	return this -> Psum_Accumulate;
+	return Psum_Accumulate;
 }

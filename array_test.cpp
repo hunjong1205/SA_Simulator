@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void func_call(const int DRAM[1][28][28]);
+void func_call(const int DRAM[][28][28]);
 
 int main()
 {
@@ -25,14 +25,15 @@ int main()
 
 //	cout << "func_call start!" << endl;
 
-	cout << "DRAM[0][0][0][0] type is : " << typeid((int [][28][28])DRAM[1][0][0][0]).name() << endl;
+//	cout << "DRAM[0][0][0][0] type is : " << typeid((int [][28][28])DRAM[1][0][0][0]).name() << endl;
+	cout << "DRAM[0] is : " << DRAM[0] << endl;
 
-// 	func_call((int [1][28][28])&DRAM[0][0][0][0]);
+ 	func_call(DRAM[0]);
 
 	return 0;
 }	
 
-void func_call(const int DRAM[1][28][28]){
+ void func_call(const int DRAM[][28][28]){
 
 		for(int j =0; j<1; j++){
 			for(int k=0; k<28; k++){
@@ -44,3 +45,4 @@ void func_call(const int DRAM[1][28][28]){
 		cout << '\n';
 
 }
+

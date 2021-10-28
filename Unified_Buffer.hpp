@@ -12,11 +12,14 @@ class Unified_Buffer {
 		int Input_fmap_Col;
 		int Filter_Row;
 		int Filter_Col;
+		int Filter_Num;
 		int Element_Size;
 		//queue<AR> *FIFO;
 		queue<int> *IFMAP_FIFO;
 		int *Accumulator_Psum;
 		int Acc_Size;
+		int Input_fmap_square_length;
+		int Strides;
 		
 
 	public:
@@ -25,21 +28,25 @@ class Unified_Buffer {
 		if(Accumulator_Psum) delete Accumulator_Psum;
 		}
 
-		void QueueMapping(const int DRAM_input_fmap[][28][28], const int Input_Index, int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel);
+		void QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel, int Filter_Num, int Strides);
 		void QueueClear();
-		void QueuetoPE(int Cycle, int* PE_Col, int One_Filter_Size);
+		bool QueuetoPE(int Cycle, int PE_Col[], int One_Filter_Size);
 		void Accumulator_to_Unified_Buffer(const int* ptr, const int Size);
 };
 
 
-void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[][28][28], const int Input_Index,int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel){
+void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel, int Filter_Num, int Strides){
 	this -> Input_fmap_Row = Input_fmap_Row;
 	this -> Input_fmap_Col = Input_fmap_Col;
 	this -> Channel = Filter_Channel;
 	this -> Filter_Row = Filter_Row;
 	this -> Filter_Col = Filter_Col;
+	this -> Filter_Num = Filter_Num;
 	this -> Element_Size = Filter_Channel * Filter_Row * Filter_Col;
 	this -> Acc_Size = 0;
+	this -> Strides = Strides;
+	this -> Input_fmap_square_length = (Input_fmap_Row - Filter_Row)/Strides + 1;
+	this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length * 2 - 1;
 	input_fmap = new int **[Channel];
 
 
@@ -72,11 +79,11 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[][28][28], const int
 	// Unified_Buffer to Input_Queue(Systolic_Data Setup)
 	for(int Start_Row=0; Start_Row<Input_fmap_Row-Filter_Row+1; Start_Row++){
 		for(int Start_Col=0; Start_Col<Input_fmap_Col-Filter_Col+1; Start_Col++){
-			Element_Index = Element_Size;
+			Element_Index = Element_Size - 1;
 			for(int j=Start_Row; j<Filter_Row+Start_Row; j++){
 				for(int k=Start_Col; k<Filter_Col+Start_Col; k++){
 					for(int i=0; i<Channel; i++){
-						if(Element_Index < 0) // Index Error occured!
+						// if(Element_Index < 0) // Index Error occured!
 						IFMAP_FIFO[Element_Index--].push(input_fmap[i][j][k]);
 					}
 				}
@@ -98,24 +105,37 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[][28][28], const int
 
 }
 
-void Unified_Buffer::QueuetoPE(int Cycle, int* PE_Col, int One_Filter_Size){
-	// while(!FIFO -> empty()) 방식으로 추가?
-	/*
-	int* tmp_ptr = new int[FIFO -> front().Size];
-	memcpy(tmp_ptr, FIFO -> front().ptr, FIFO -> front().Size];
-	FIFO -> pop();
-	return tmp_ptr;
-	*/
+bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], int One_Filter_Size){
 
-	int Cycle_tmp;
-	if(Cycle > One_Filter_Size) Cycle_tmp = One_Filter_Size;
-	else Cycle_tmp = Cycle + 1;
-	for(int i=0; i<Cycle_tmp; i++){
-		PE_Col[i] =	IFMAP_FIFO[i].front();		
-		IFMAP_FIFO[i].pop();
-	}	
+	if(Cycle > (Input_fmap_square_length)){
+		cout << "Queue to PE Transport is done! \n";
+		return 0;
+	}
+	
+	// Input_feature map 사각형 앞부분
+	if(Cycle < (Filter_Num - 1)){
+		for(int i=0; i<(Cycle+1); i++){
+			PE_Col[i] =	IFMAP_FIFO[i].front();		
+			IFMAP_FIFO[i].pop();
+		}	
 
-	cout<< Cycle_tmp <<" cycle is done \n";
+		return 1;
+	}
+
+	// Input_feature map 사각형 중간 및 끝부분
+	else{
+		for(int i=0; i<One_Filter_Size; i++){
+			if(!IFMAP_FIFO[i].empty()){
+				PE_Col[i] =	IFMAP_FIFO[i].front();		
+				IFMAP_FIFO[i].pop();
+			}
+		}	
+
+		return 1;
+	}
+	
+	return 0;
+
 }
 
 void Unified_Buffer::QueueClear(){

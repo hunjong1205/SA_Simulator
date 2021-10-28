@@ -19,12 +19,12 @@ class Weight_FIFO {
 	public:
 		Weight_FIFO();
 		~Weight_FIFO(){ /* Add Deallocation Debugging */ };
-		void FIFOMapping(const int ****DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel);
-		int** FIFOtoPE(const int One_Filter_Size);
+		void FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel);
+		int (* FIFOtoPE())[5](const int One_Filter_Size);
 		void FIFOClear();
 };
 
-void Weight_FIFO::FIFOMapping(const int ****DRAM_Weight_fmap, int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel){
+void Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel){
 	this -> Weight_fmap_Row = Weight_fmap_Row;
 	this -> Weight_fmap_Col = Weight_fmap_Col;
 	this -> Weight_fmap_Num = Weight_fmap_Num;
@@ -87,7 +87,7 @@ void Weight_FIFO::FIFOMapping(const int ****DRAM_Weight_fmap, int Weight_fmap_Ro
 
 //}
 
-int** Weight_FIFO::FIFOtoPE(const int One_Filter_Size){
+int Weight_FIFO::(*FIFOtoPE ())[5](const int One_Filter_Size){
 	/*
 	int tmp_array[Element_Size]; 
 	for(int i = 0; i<Element_Size; i++){

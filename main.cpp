@@ -13,12 +13,10 @@ int main(){
 	// Input Structure Variable
 	// Matrix fixed [Number][Channel][Row][Columm]
 	int DRAM_Input_fmap [10000][1][28][28]; // 10000 : # of input, 1 : Channel, 28 : Row, 28 : Col
- // int DRAM_Input_fmap [1][28][28]; 
 	int Input_fmap_Row_Size;
 	int Input_fmap_Col_Size;
 
 	// Simulator Variable
-	int Cycle = 0;
 	int* PE_Col = new int[256];
 
 
@@ -36,12 +34,12 @@ int main(){
 	Data(DRAM_Input_fmap, Input_fmap_Row_Size, Input_fmap_Col_Size);
 	
 		// Configure Filter from ML Library file
-		// int DRAM_Weight_fmap [m][a][b][c]; // m : Num, a : Channel, b : Col, c : Row (?)
-		// int Strides;
+		int DRAM_Weight_fmap [5][3][3][3]; // m : Num, a : Channel, b : Col, c : Row (?)
+		int Strides = 1;
 		int Filter_Row_Size = 3;
 		int Filter_Col_Size = 3;
 		int Filter_Channel_Size = 3;
-		// int Filter_Num_Size;
+		int Filter_Num_Size = 5;
 
 		int One_Filter_Size = Filter_Row_Size * Filter_Col_Size * Filter_Channel_Size;
 		
@@ -68,37 +66,46 @@ int main(){
 	int Unified_Buffer_Index = 0;
 	int Input_Index = 0;
 
+	bool Weight_FIFO_Init = 0;
+
+
 	cout << "Simulation Execution Start \n";
 	// PE execution(Push_PE_Input_fmap)
-	while(Input_Index_Number < 10000)
+	while(Input_Index < 10000)
 	{
 
 		// while(!UB1.QueueMapping) 으로 대체!
 		// 1. Unified Buffer to Input_fmap Queue
-		int temp[1][28][28] = (temp ***)DRAM_Input_fmap;
-		UB1.QueueMapping(DRAM_Input_fmap[Input_Index][0][0][0], Input_Index, Input_fmap_Row_Size, Input_fmap_Col_Size, Filter_Row_Size, Filter_Col_Size, Filter_Channel_Size);
+		UB1.QueueMapping(DRAM_Input_fmap[Input_Index], Input_Index, Input_fmap_Row_Size, Input_fmap_Col_Size, Filter_Row_Size, Filter_Col_Size, Filter_Channel_Size, Filter_Num_Size, Strides);
 
 		// 2. Weight Array Structure to Weight FIFO
-		// WF1.FIFOMapping(DRAM_Weight_fmap, Filter_Row, Filter_Col, Filter_Num, Filter_Channel);
+		if(!Weight_FIFO_Init)
+		// Weight_FIFO_Init = WF1.FIFOMapping(DRAM_Weight_fmap, Filter_Row_Size, Filter_Col_Size, Filter_Num_Size, Filter_Channel_Size);
 
-		// 3. Set_PE_Weight
-		// MXU1.Set_PE_Weight(WF1.FIFOtoPE(One_Filter_Size), Filter_Num, One_Filter_Size);
+		// 3. Set PEs Weight
+		// MXU1.Set_PE_Weight(WF1.FIFOtoPE(One_Filter_Size), Filter_Num_Size, One_Filter_Size);
 
 		cout << "Start Input feature map Queue to PE \n";
 
-		// Input fmap to PE
+		// 4. Input fmap to PE
 		// Get Input fmap data using PE_Col
-		// for()
-		// (*) UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, One_Filter_Size);	// Queue에 뒷부분에서 PE로 어떻게 전달되는지?
-
+		Unified_Buffer_Index = 0;
+		Acc1.Init_Accumulator();
+		while(UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, One_Filter_Size)){
+		
 		// 5. PE MAC Operation
-		// MXU1.MAC(PE_Col);
-
+		MXU1.MAC(PE_Col);
+		MXU1.Get_MXU_Last_PSUM(PSUM);
+		
 		// 6. Accumulate Partial_Sum
-		// MXU1.Get_MXU_Partial_Sum(&PSUM);
-		// Acc1.Add_partialsum(PSUM, 256);
+		Acc1.Add_PartialSum(PSUM);
+		}
 
-		++Cycle;
+		// 7. Accumulator PSUM to Unified_Buffer 
+		UB1.Accumulator_to_Unified_Buffer(Acc1.Get_Psum_ptr(), Acc1.Get_Accumulator_Size());
+
+
+
 		++Input_Index;
 		// UB1 Deallocation
 
