@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Feature_map.hpp"
+#include "InputWeight_Info.hpp"
 
 using namespace std;
 

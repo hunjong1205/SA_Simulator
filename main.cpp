@@ -4,7 +4,6 @@
 #include "Weight_FIFO.hpp"
 #include "Accumulator.hpp"
 #include "ReadMNIST.hpp"
-#include "Feature_map.hpp"
 
 using namespace std;
 
@@ -17,13 +16,6 @@ int main(){
 
 	// Simulator Variable
 	int* PE_Col = new int[256];
-
-
-
-
-
-
-
 
 	cout << "Simulation Config Start \n";
 	
