@@ -20,14 +20,14 @@ class Unified_Buffer {
 		if(Accumulator_Psum) delete Accumulator_Psum;
 		}
 
-		void QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, const Feature_map_info &info);
+		void QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, const Input_Weight_Info &info);
 		void QueueClear();
-		bool QueuetoPE(int Cycle, int PE_Col[], const Feature_map_info &info);
+		bool QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info &info);
 		void Accumulator_to_Unified_Buffer(const int* ptr, const int Size);
 };
 
 
-void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, const Feature_map_info &info){ 
+void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, const Input_Weight_Info &info){ 
 	this -> Acc_Size = 0;
 	this -> Input_fmap_square_length = (info.Input_fmap_Row_Size - info.Filter_Row_Size)/info.Strides + 1;
 	this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length * 2 - 1;
@@ -89,7 +89,7 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const in
 
 }
 
-bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Feature_map_info &info){
+bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info &info){
 
 	if(Cycle > (Input_fmap_square_length)){
 		cout << "Queue to PE Transport is done! \n";

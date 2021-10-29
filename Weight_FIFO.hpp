@@ -15,12 +15,12 @@ class Weight_FIFO {
 	public:
 		Weight_FIFO();
 		~Weight_FIFO(){ /* Add Deallocation Debugging */ };
-		bool FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Feature_map_info &info);
-		auto FIFOtoPE(const Feature_map_info &info);
-		void FIFOClear(const Feature_map_info &info);
+		bool FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Input_Weight_Info &info);
+		auto FIFOtoPE(const Input_Weight_Info &info);
+		void FIFOClear(const Input_Weight_Info &info);
 };
 
-bool Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Feature_map_info &info){
+bool Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Input_Weight_Info &info){
 
 	// Weight_fmap Memory Allocation to DRAM
 	Weight = new int *** [info.Filter_Num_Size];
@@ -80,7 +80,7 @@ bool Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Featu
 
 //}
 
-auto Weight_FIFO::FIFOtoPE(const Feature_map_info &info){
+auto Weight_FIFO::FIFOtoPE(const Input_Weight_Info &info){
 	/*
 	int tmp_array[Element_Size]; 
 	for(int i = 0; i<Element_Size; i++){
@@ -111,7 +111,7 @@ auto Weight_FIFO::FIFOtoPE(const Feature_map_info &info){
 
 }
 
-void Weight_FIFO::FIFOClear(const Feature_map_info &info){
+void Weight_FIFO::FIFOClear(const Input_Weight_Info &info){
 
 	// Memory Deallocation
 	for(int m=0; m<info.Filter_Num_Size; m++)
