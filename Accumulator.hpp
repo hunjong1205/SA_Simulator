@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Feature_map.hpp"
 
 using namespace std;
 

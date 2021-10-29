@@ -2,18 +2,19 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include "Feature_map.hpp"
  
 using namespace std;
+
 int ReverseInt(int i);
-void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int Input_fmap[10000][1][28][28]);
+void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int Input_fmap[10000][1][28][28], Feature_map_info &info);
 void ReadMNISTLabel(vector<unsigned char> &arr);
  
-void Data(int Input_fmap[10000][1][28][28], int& Row_Size, int& Col_Size)
+void Data(int Input_fmap[10000][1][28][28], Feature_map_info &info)
 {
     vector<vector<double>> ai;
-    ReadMNIST(10000, 784, ai, Input_fmap);                // 훈련데이터를 불러옴
-	Row_Size = 28;
-	Col_Size = 28;
+    ReadMNIST(10000, 784, ai, Input_fmap, info);                // 훈련데이터를 불러옴
+
 //  vector<unsigned char> al;
 //  ReadMNISTLabel(al);                        // 레이블을 읽어 옴
 /*	for(int k = 0; k<100; k++){
@@ -40,7 +41,7 @@ int ReverseInt(int i)
     ch4 = (i >> 24) & 255;
     return((int)ch1 << 24) + ((int)ch2 << 16) + ((int)ch3 << 8) + ch4;
 }
-void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int Input_fmap[10000][1][28][28])   // MNIST데이터를 읽어온다.
+void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int Input_fmap[10000][1][28][28], Feature_map_info &info)   // MNIST데이터를 읽어온다.
 {
     arr.resize(NumberOfImages, vector<double>(DataOfAnImage));
     ifstream file("./t10k-images-idx3-ubyte", ios::binary);
@@ -58,8 +59,11 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &ar
         number_of_images = ReverseInt(number_of_images);
         file.read((char*)&n_rows, sizeof(n_rows));
         n_rows = ReverseInt(n_rows);
+		info.Input_fmap_Row_Size = n_rows;
         file.read((char*)&n_cols, sizeof(n_cols));
         n_cols = ReverseInt(n_cols);
+		info.Input_fmap_Col_Size = n_cols;
+		info.Input_fmap_Channel_Size = 1;
  
         char inputstring[1000];
         for (int i = 0; i<10000; ++i)

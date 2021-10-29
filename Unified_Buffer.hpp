@@ -1,25 +1,17 @@
 #include <iostream>
 #include <cstring>
 #include <queue>
+#include "Feature_map.hpp"
 
 using namespace std;
 
 class Unified_Buffer {
 	private:	
 		int ***input_fmap;
-		int Channel;
-		int Input_fmap_Row;
-		int Input_fmap_Col;
-		int Filter_Row;
-		int Filter_Col;
-		int Filter_Num;
-		int Element_Size;
-		//queue<AR> *FIFO;
 		queue<int> *IFMAP_FIFO;
 		int *Accumulator_Psum;
 		int Acc_Size;
 		int Input_fmap_square_length;
-		int Strides;
 		
 
 	public:
@@ -28,32 +20,24 @@ class Unified_Buffer {
 		if(Accumulator_Psum) delete Accumulator_Psum;
 		}
 
-		void QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel, int Filter_Num, int Strides);
+		void QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, const Feature_map_info &info);
 		void QueueClear();
-		bool QueuetoPE(int Cycle, int PE_Col[], int One_Filter_Size);
+		bool QueuetoPE(int Cycle, int PE_Col[], const Feature_map_info &info);
 		void Accumulator_to_Unified_Buffer(const int* ptr, const int Size);
 };
 
 
-void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, int Input_fmap_Row, int Input_fmap_Col, int Filter_Row, int Filter_Col, int Filter_Channel, int Filter_Num, int Strides){
-	this -> Input_fmap_Row = Input_fmap_Row;
-	this -> Input_fmap_Col = Input_fmap_Col;
-	this -> Channel = Filter_Channel;
-	this -> Filter_Row = Filter_Row;
-	this -> Filter_Col = Filter_Col;
-	this -> Filter_Num = Filter_Num;
-	this -> Element_Size = Filter_Channel * Filter_Row * Filter_Col;
+void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, const Feature_map_info &info){ 
 	this -> Acc_Size = 0;
-	this -> Strides = Strides;
-	this -> Input_fmap_square_length = (Input_fmap_Row - Filter_Row)/Strides + 1;
+	this -> Input_fmap_square_length = (info.Input_fmap_Row_Size - info.Filter_Row_Size)/info.Strides + 1;
 	this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length * 2 - 1;
-	input_fmap = new int **[Channel];
+	input_fmap = new int **[info.Input_fmap_Channel_Size];
 
 
 	// Input_fmap Memory Allocation to DRAM
-	for(int i=0; i<Channel; i++){
-		input_fmap[i] = new int * [Input_fmap_Col];
-		for(int j=0; j<Input_fmap_Col; j++) input_fmap[i][j] = new int [Input_fmap_Row];
+	for(int i=0; i<info.Input_fmap_Channel_Size; i++){
+		input_fmap[i] = new int * [info.Input_fmap_Col_Size];
+		for(int j=0; j<info.Input_fmap_Col_Size; j++) input_fmap[i][j] = new int [info.Input_fmap_Row_Size];
 	}
 
 	// DRAM -> Unified_Buffer
@@ -74,15 +58,15 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const in
 	// this -> FIFO = new queue<AR>;
 	
 	// Malloc Queue Size, It Needs QueueClear essentially!
-	this -> IFMAP_FIFO = new queue<int>[Element_Size];
+	this -> IFMAP_FIFO = new queue<int>[info.One_Filter_Size];
 
 	// Unified_Buffer to Input_Queue(Systolic_Data Setup)
-	for(int Start_Row=0; Start_Row<Input_fmap_Row-Filter_Row+1; Start_Row++){
-		for(int Start_Col=0; Start_Col<Input_fmap_Col-Filter_Col+1; Start_Col++){
-			Element_Index = Element_Size - 1;
-			for(int j=Start_Row; j<Filter_Row+Start_Row; j++){
-				for(int k=Start_Col; k<Filter_Col+Start_Col; k++){
-					for(int i=0; i<Channel; i++){
+	for(int Start_Row=0; Start_Row<info.Input_fmap_Row_Size-info.Filter_Row_Size+1; Start_Row++){
+		for(int Start_Col=0; Start_Col<info.Input_fmap_Col_Size-info.Filter_Col_Size+1; Start_Col++){
+			Element_Index = info.One_Filter_Size - 1;
+			for(int j=Start_Row; j<info.Filter_Row_Size+Start_Row; j++){
+				for(int k=Start_Col; k<info.Filter_Col_Size+Start_Col; k++){
+					for(int i=0; i<info.Input_fmap_Channel_Size; i++){
 						// if(Element_Index < 0) // Index Error occured!
 						IFMAP_FIFO[Element_Index--].push(input_fmap[i][j][k]);
 					}
@@ -94,8 +78,8 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const in
 	cout<< "Input fmap Unified_Buffer to Input_Queue Done! \n";
 
 	// Memory Deallocation of input_fmap
-	for(int i=0; i<Channel; i++){
-		for(int j=0; j<Input_fmap_Row; j++) delete [] input_fmap[i][j];
+	for(int i=0; i<info.Input_fmap_Channel_Size; i++){
+		for(int j=0; j<info.Input_fmap_Row_Size; j++) delete [] input_fmap[i][j];
 	}
 
 	for(int i=0; i<3; i++) delete [] input_fmap[i];
@@ -105,7 +89,7 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const in
 
 }
 
-bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], int One_Filter_Size){
+bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Feature_map_info &info){
 
 	if(Cycle > (Input_fmap_square_length)){
 		cout << "Queue to PE Transport is done! \n";
@@ -113,7 +97,7 @@ bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], int One_Filter_Size){
 	}
 	
 	// Input_feature map 사각형 앞부분
-	if(Cycle < (Filter_Num - 1)){
+	if(Cycle < (info.Filter_Num_Size - 1)){
 		for(int i=0; i<(Cycle+1); i++){
 			PE_Col[i] =	IFMAP_FIFO[i].front();		
 			IFMAP_FIFO[i].pop();
@@ -124,7 +108,7 @@ bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], int One_Filter_Size){
 
 	// Input_feature map 사각형 중간 및 끝부분
 	else{
-		for(int i=0; i<One_Filter_Size; i++){
+		for(int i=0; i<info.One_Filter_Size; i++){
 			if(!IFMAP_FIFO[i].empty()){
 				PE_Col[i] =	IFMAP_FIFO[i].front();		
 				IFMAP_FIFO[i].pop();
@@ -189,9 +173,9 @@ typedef struct AR{
 			memcpy(this -> ptr, AR_Origin.ptr, AR_Origin.Size);
 		}
 
-		void reset(int Element_Size)
+		void reset(int info.One_Filter_Size)
 		{
-			ptr = new int[Element_Size];
+			ptr = new int[info.One_Filter_Size];
 		}
 		~AR()
 		{

@@ -4,6 +4,7 @@
 #include "Weight_FIFO.hpp"
 #include "Accumulator.hpp"
 #include "ReadMNIST.hpp"
+#include "Feature_map.hpp"
 
 using namespace std;
 
@@ -13,8 +14,6 @@ int main(){
 	// Input Structure Variable
 	// Matrix fixed [Number][Channel][Row][Columm]
 	int DRAM_Input_fmap [10000][1][28][28]; // 10000 : # of input, 1 : Channel, 28 : Row, 28 : Col
-	int Input_fmap_Row_Size;
-	int Input_fmap_Col_Size;
 
 	// Simulator Variable
 	int* PE_Col = new int[256];
@@ -30,8 +29,9 @@ int main(){
 	
 	// Input fmap Settings, Filter fmap Settings
 	cout << "Configure Input feature map & Filter feature map start! \n";
-	
-	Data(DRAM_Input_fmap, Input_fmap_Row_Size, Input_fmap_Col_Size);
+
+	Feature_map_info Feature_info;
+	Data(DRAM_Input_fmap, Feature_info);
 	
 		// Configure Filter from ML Library file
 		int DRAM_Weight_fmap [5][3][3][3]; // m : Num, a : Channel, b : Col, c : Row (?)
@@ -76,14 +76,14 @@ int main(){
 
 		// while(!UB1.QueueMapping) 으로 대체!
 		// 1. Unified Buffer to Input_fmap Queue
-		UB1.QueueMapping(DRAM_Input_fmap[Input_Index], Input_Index, Input_fmap_Row_Size, Input_fmap_Col_Size, Filter_Row_Size, Filter_Col_Size, Filter_Channel_Size, Filter_Num_Size, Strides);
+		UB1.QueueMapping(DRAM_Input_fmap[Input_Index], Input_Index, Feature_info);
 
 		// 2. Weight Array Structure to Weight FIFO
 		if(!Weight_FIFO_Init)
-		// Weight_FIFO_Init = WF1.FIFOMapping(DRAM_Weight_fmap, Filter_Row_Size, Filter_Col_Size, Filter_Num_Size, Filter_Channel_Size);
+		Weight_FIFO_Init = WF1.FIFOMapping(DRAM_Weight_fmap, Feature_info);
 
 		// 3. Set PEs Weight
-		// MXU1.Set_PE_Weight(WF1.FIFOtoPE(One_Filter_Size), Filter_Num_Size, One_Filter_Size);
+		MXU1.Set_PE_Weight(WF1.FIFOtoPE(Feature_info), Feature_info);
 
 		cout << "Start Input feature map Queue to PE \n";
 
@@ -91,7 +91,7 @@ int main(){
 		// Get Input fmap data using PE_Col
 		Unified_Buffer_Index = 0;
 		Acc1.Init_Accumulator();
-		while(UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, One_Filter_Size)){
+		while(UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, Feature_info)){
 		
 		// 5. PE MAC Operation
 		MXU1.MAC(PE_Col);
@@ -124,3 +124,5 @@ int main(){
 }
 
 // Input, Weight featuremap information -> Struct
+// Weight_FIFO Configuration
+// Input from Tensorflow 

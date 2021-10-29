@@ -2,6 +2,7 @@
 #include <queue>
 #include <algorithm>
 #include <cstring>
+#include "Feature_map.hpp"
 
 using namespace std;
 
@@ -9,39 +10,29 @@ using namespace std;
 class Weight_FIFO {
 	private:
 		int ****Weight;
-		int Weight_fmap_Row;
-		int Weight_fmap_Col;
-		int Weight_fmap_Num;
-		int Weight_fmap_Channel;
-		int Element_Size;
 		queue<int> *WFMAP_FIFO;
 
 	public:
 		Weight_FIFO();
 		~Weight_FIFO(){ /* Add Deallocation Debugging */ };
-		void FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel);
-		int (* FIFOtoPE())[5](const int One_Filter_Size);
-		void FIFOClear();
+		bool FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Feature_map_info &info);
+		auto FIFOtoPE(const Feature_map_info &info);
+		void FIFOClear(const Feature_map_info &info);
 };
 
-void Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], int Weight_fmap_Row, int Weight_fmap_Col, int Weight_fmap_Num , int Weight_fmap_Channel){
-	this -> Weight_fmap_Row = Weight_fmap_Row;
-	this -> Weight_fmap_Col = Weight_fmap_Col;
-	this -> Weight_fmap_Num = Weight_fmap_Num;
-	this -> Weight_fmap_Channel = Weight_fmap_Channel;
-	this -> Element_Size = Weight_fmap_Num;
+bool Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Feature_map_info &info){
 
 	// Weight_fmap Memory Allocation to DRAM
-	Weight = new int *** [Weight_fmap_Num];
+	Weight = new int *** [info.Filter_Num_Size];
 
-	for(int m=0; m<Weight_fmap_Num; m++)
+	for(int m=0; m<info.Filter_Num_Size; m++)
 	{
-			Weight[m] = new int ** [Weight_fmap_Channel];
-			for(int c=0; c<Weight_fmap_Channel; c++)
+			Weight[m] = new int ** [info.Filter_Channel_Size];
+			for(int c=0; c<info.Filter_Channel_Size; c++)
 			{
-				Weight[m][c] = new int * [Weight_fmap_Col];
-				for(int r=0; r<Weight_fmap_Col; r++)
-					Weight[m][c][r] = new int[Weight_fmap_Row];
+				Weight[m][c] = new int * [info.Filter_Col_Size];
+				for(int r=0; r<info.Filter_Col_Size; r++)
+					Weight[m][c][r] = new int[info.Filter_Row_Size];
 			}
 	}
 
@@ -58,6 +49,8 @@ void Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], int Weight_
 
 	// DRAM -> FIFO 로 바로 넣는 방법도 가능함(아래 for문에서 DRAM_Weight_Fmap에서 AR2로 뽑아서 바로 FIFO에 넣을수 있음)
 	// 현재는 DRAM(Off-Chip Memory) -> Weight_FIFO(On-Chip Memory 구현을 모방하기 위해 memcpy 사용함
+	
+	return 1;
 
 }
 // void Weight_FIFO::FIFOMapping(){
@@ -72,10 +65,10 @@ void Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], int Weight_
 	// Weight_FIFO to Weight_FIFO Queue
 	/*
 	int Element_Index = 0;
-	for(int i=0; i<Weight_fmap_Num; i++){
-		for(int j=0; j<Weight_fmap_Row; j++){
-			for(int k=0; k<Weight_fmap_Col; k++){
-				for(int m=0; m<Weight_fmap_Channel; m++){
+	for(int i=0; i<info.Filter_Num_Size; i++){
+		for(int j=0; j<info.Filter_Row_Size; j++){
+			for(int k=0; k<info.Filter_Col_Size; k++){
+				for(int m=0; m<info.Filter_Channel_Size; m++){
 					WFMAP_FIFO[Element_Index].push(Weight[i][m][k][j]);
 				}
 			}
@@ -87,7 +80,7 @@ void Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], int Weight_
 
 //}
 
-int Weight_FIFO::(*FIFOtoPE ())[5](const int One_Filter_Size){
+auto Weight_FIFO::FIFOtoPE(const Feature_map_info &info){
 	/*
 	int tmp_array[Element_Size]; 
 	for(int i = 0; i<Element_Size; i++){
@@ -101,14 +94,14 @@ int Weight_FIFO::(*FIFOtoPE ())[5](const int One_Filter_Size){
 	*/
 
 	// Allocate temporal Weight Bus, Deallocate in MXU::Set_PE_Weight
-	int **tmp = new int*[One_Filter_Size];
-	for(int i=0; i<One_Filter_Size; i++) tmp[i] = new int[Weight_fmap_Num];
+	int **tmp = new int*[info.One_Filter_Size];
+	for(int i=0; i<info.One_Filter_Size; i++) tmp[i] = new int[info.Filter_Num_Size];
 
-	for(int i=0; i<Weight_fmap_Num; i++){
-		for(int c=0; c<Weight_fmap_Row; c++){
-			for(int b=0; b<Weight_fmap_Col; b++){
-				for(int a=0; a<Weight_fmap_Channel; a++){
-					tmp[One_Filter_Size - (a + b + c)][i] = Weight[i][a][b][c];
+	for(int i=0; i<info.Filter_Num_Size; i++){
+		for(int c=0; c<info.Filter_Row_Size; c++){
+			for(int b=0; b<info.Filter_Col_Size; b++){
+				for(int a=0; a<info.Filter_Channel_Size; a++){
+					tmp[info.One_Filter_Size - (a + b + c)][i] = Weight[i][a][b][c];
 				}
 			}
 		}
@@ -118,14 +111,14 @@ int Weight_FIFO::(*FIFOtoPE ())[5](const int One_Filter_Size){
 
 }
 
-void Weight_FIFO::FIFOClear(){
+void Weight_FIFO::FIFOClear(const Feature_map_info &info){
 
 	// Memory Deallocation
-	for(int m=0; m<Weight_fmap_Num; m++)
+	for(int m=0; m<info.Filter_Num_Size; m++)
 	{
-		for(int c=0; c<Weight_fmap_Channel; c++)
+		for(int c=0; c<info.Filter_Channel_Size; c++)
 		{
-			for(int r=0; r<Weight_fmap_Row; r++) delete[] Weight[m][c][r];
+			for(int r=0; r<info.Filter_Row_Size; r++) delete[] Weight[m][c][r];
 		delete[] Weight[m][c];
 		}
 		delete[] Weight[m];

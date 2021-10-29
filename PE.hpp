@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Feature_map.hpp"
 
 using namespace std;
 
@@ -55,21 +56,21 @@ class MXU {
 		}
 	}
 
-	void Set_PE_Weight(const int** Weight, const int Filter_Num_Size, const int One_Filter_Size); 					//Get Weight from Weight FIFO
+	void Set_PE_Weight(const int** Weight, const Feature_map_info &info); 					//Get Weight from Weight FIFO
 	void Reset_PE_Weight();
 	void MAC(const int* PE_Col);
 	void Get_MXU_Last_PSUM(int* PSUM);
 };
 
 // One_Filter_Size = Filter 한개당 Row * Col * Channel
-void MXU::Set_PE_Weight(const int** Weight, const int Filter_Num_Size, const int One_Filter_Size){
-	for(int k = 0; k < One_Filter_Size; k++){
-		for(int j = 0; j < Filter_Num_Size; j++)
+void MXU::Set_PE_Weight(const int** Weight, const Feature_map_info &info){
+	for(int k = 0; k < info.One_Filter_Size; k++){
+		for(int j = 0; j < info.Filter_Num_Size; j++)
 			PEs[k][j].Set_Scratchpad(Weight[k][j]);
 	}
 
 	if(Weight){
-		for(int i = 0; i <One_Filter_Size; i++)
+		for(int i = 0; i <info.One_Filter_Size; i++)
 			delete[] Weight[i];
 		delete[] Weight;
 		Weight = nullptr;
