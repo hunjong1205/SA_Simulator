@@ -2,7 +2,7 @@ PE.o : PE.hpp
 	g++ -c PE.hpp -o PE.o
 
 InputWeight_Info.o : InputWeight_Info.hpp
-	g++ -c InputWeight_Info.hpp -o InputWeight_info.o
+	g++ -c InputWeight_Info.hpp -o InputWeight_Info.o
 	
 Unified_Buffer.o : Unified_Buffer.hpp
 	g++ -c Unified_Buffer.hpp -o Unified_Buffer.o
