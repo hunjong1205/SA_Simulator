@@ -1,24 +1,23 @@
-PE.o : PE.hpp
-	g++ -c PE.hpp -o PE.o
+main : main.o Accumulator.o PE.o ReadMNIST.o Unified_Buffer.o Weight_FIFO.o
+	g++ -o main main.o Accumulator.o PE.o ReadMNIST.o Unified_Buffer.o Weight_FIFO.o
 
-InputWeight_Info.o : InputWeight_Info.hpp
-	g++ -c InputWeight_Info.hpp -o InputWeight_Info.o
-	
-Unified_Buffer.o : Unified_Buffer.hpp
-	g++ -c Unified_Buffer.hpp -o Unified_Buffer.o
+main.o : InputWeight_Info.hpp Accumulator.h PE.h ReadMNIST.h Unified_Buffer.h Weight_FIFO.h main.cpp
+	g++ -c -o main.o main.cpp
 
-Weight_FIFO.o : Weight_FIFO.hpp
-	g++ -c Weight_FIFO.hpp -o Weight_FIFO.o
+Accumulator.o : Accumulator.h Accumulator.cpp InputWeight_Info.hpp
+	g++ -c -o Accumulator.o Accumulator.cpp
 
-Accumulator.o : Accumulator.hpp
-	g++ -c Accumulator.hpp -o Accumulator.o
+PE.o : PE.h	PE.cpp InputWeight_Info.hpp
+	g++ -c -o PE.o PE.cpp
 
-ReadMNIST.o : ReadMNIST.hpp
-	g++ -c ReadMNIST.hpp -o ReadMNIST.o
+ReadMNIST.o : ReadMNIST.h ReadMNIST.cpp InputWeight_Info.hpp
+	g++ -c -o ReadMNIST.o ReadMNIST.cpp
 
-main.o : main.cpp PE.hpp Unified_Buffer.hpp Weight_FIFO.hpp Accumulator.hpp ReadMNIST.hpp InputWeight_Info.hpp
-	g++ -c main.cpp -o main.o
+Unified_Buffer.o : Unified_Buffer.h Unified_Buffer.cpp InputWeight_Info.hpp
+	g++ -c -o Unified_Buffer.o Unified_Buffer.cpp
 
-main : PE.o Unified_Buffer.o Weight_FIFO.o Accumulator.o ReadMNIST.o InputWeight_Info.o main.o
-	g++ PE.o Unified_Buffer.o Weight_FIFO.o Accumulator.o ReadMNIST.o InputWeight_Info.o main.o -o main
+Weight_FIFO.o : Weight_FIFO.h Weight_FIFO.cpp InputWeight_Info.hpp
+	g++ -c -o Weight_FIFO.o	Weight_FIFO.cpp
 
+clean :
+	rm *.o
