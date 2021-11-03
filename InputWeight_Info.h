@@ -20,6 +20,6 @@ class Input_Weight_Info{
 		int Strides;
 
 		int	One_Filter_Size;
-
+		void print();
 };
 #endif

@@ -44,7 +44,7 @@ class MXU {
 		}
 	}
 
-	void Set_PE_Weight(auto Weight, const Input_Weight_Info &info); 					//Get Weight from Weight FIFO
+	void Set_PE_Weight(float Weight[][32], const Input_Weight_Info &info); 					//Get Weight from Weight FIFO
 	void Reset_PE_Weight();
 	void MAC(const int* PE_Col);
 	void Get_MXU_Last_PSUM(int* PSUM);

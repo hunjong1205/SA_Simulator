@@ -2,17 +2,18 @@
 
 using namespace std;
 
-void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const int Input_Index, const Input_Weight_Info &info){ 
+void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], const int Input_Index, const Input_Weight_Info &info){ 
+	cout << "Start Unified_Buffer QueueMapping !" << endl;
 	this -> Acc_Size = 0;
 	this -> Input_fmap_square_length = (info.Input_fmap_Row_Size - info.Filter_Row_Size)/info.Strides + 1;
 	this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length * 2 - 1;
-	input_fmap = new int **[info.Input_fmap_Channel_Size];
+	//input_fmap = new uint8_t **[info.Input_fmap_Channel_Size];
 
 
 	// Input_fmap Memory Allocation to DRAM
-	for(int i=0; i<info.Input_fmap_Channel_Size; i++){
-		input_fmap[i] = new int * [info.Input_fmap_Col_Size];
-		for(int j=0; j<info.Input_fmap_Col_Size; j++) input_fmap[i][j] = new int [info.Input_fmap_Row_Size];
+	/*for(int i=0; i<info.Input_fmap_Channel_Size; i++){
+		input_fmap[i] = new uint8_t * [info.Input_fmap_Row_Size];
+		for(int j=0; j<info.Input_fmap_Row_Size; j++) input_fmap[i][j] = new uint8_t [info.Input_fmap_Col_Size];
 	}
 
 	// DRAM -> Unified_Buffer
@@ -21,7 +22,7 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const in
 		cout<< "Memcpy Error occured! \n";
 		exit(EXIT_FAILURE);
 	}
-
+	*/
 	cout<< "Input fmap transferred from DRAM to Unified Buffer \n";
 			
 	int Start_Col= 0;
@@ -31,19 +32,18 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const in
 
 	// Malloc Queue Size, It Needs QueueClear essentially!
 	// this -> FIFO = new queue<AR>;
-	
 	// Malloc Queue Size, It Needs QueueClear essentially!
-	this -> IFMAP_FIFO = new queue<int>[info.One_Filter_Size];
+	this -> IFMAP_FIFO = new queue<uint8_t>[info.One_Filter_Size];
 
 	// Unified_Buffer to Input_Queue(Systolic_Data Setup)
-	for(int Start_Row=0; Start_Row<info.Input_fmap_Row_Size-info.Filter_Row_Size+1; Start_Row++){
-		for(int Start_Col=0; Start_Col<info.Input_fmap_Col_Size-info.Filter_Col_Size+1; Start_Col++){
+	for(int Start_Row=0; Start_Row<(info.Input_fmap_Row_Size-info.Filter_Row_Size+1); Start_Row++){
+		for(int Start_Col=0; Start_Col<(info.Input_fmap_Col_Size-info.Filter_Col_Size+1); Start_Col++){
 			Element_Index = info.One_Filter_Size - 1;
 			for(int j=Start_Row; j<info.Filter_Row_Size+Start_Row; j++){
 				for(int k=Start_Col; k<info.Filter_Col_Size+Start_Col; k++){
 					for(int i=0; i<info.Input_fmap_Channel_Size; i++){
-						// if(Element_Index < 0) // Index Error occured!
-						IFMAP_FIFO[Element_Index--].push(input_fmap[i][j][k]);
+						//if(Element_Index >= 0) // Index Error occured!
+						IFMAP_FIFO[Element_Index--].push(DRAM_input_fmap[i][j][k]);
 					}
 				}
 			}
@@ -53,15 +53,16 @@ void Unified_Buffer::QueueMapping(const int DRAM_input_fmap[1][28][28], const in
 	cout<< "Input fmap Unified_Buffer to Input_Queue Done! \n";
 
 	// Memory Deallocation of input_fmap
+	/*
 	for(int i=0; i<info.Input_fmap_Channel_Size; i++){
 		for(int j=0; j<info.Input_fmap_Row_Size; j++) delete [] input_fmap[i][j];
 	}
 
-	for(int i=0; i<3; i++) delete [] input_fmap[i];
+	for(int i=0; i<info.Input_fmap_Channel_Size; i++) delete [] input_fmap[i];
 	
 	delete[] input_fmap;
 	input_fmap = nullptr;
-
+	*/
 }
 
 bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info &info){

@@ -9,13 +9,13 @@ using namespace std;
 //Weight FIFO
 class Weight_FIFO {
 	private:
-		int ****Weight;
-		queue<int> *WFMAP_FIFO;
+		float ****Weight;
+		queue<float> *WFMAP_FIFO;
 
 	public:
-		Weight_FIFO();
+		Weight_FIFO(){};
 		~Weight_FIFO(){ /* Add Deallocation Debugging */ };
-		bool FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Input_Weight_Info &info);
-		auto FIFOtoPE(const Input_Weight_Info &info);
+		bool FIFOMapping(const float DRAM_Weight_fmap[][1][3][3], const Input_Weight_Info &info);
+		float** FIFOtoPE(const Input_Weight_Info &info);
 		void FIFOClear(const Input_Weight_Info &info);
 };

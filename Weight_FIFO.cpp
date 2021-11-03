@@ -2,19 +2,19 @@
 
 using namespace std;
 
-bool Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Input_Weight_Info &info){
+bool Weight_FIFO::FIFOMapping(const float DRAM_Weight_fmap[][1][3][3], const Input_Weight_Info &info){
 
 	// Weight_fmap Memory Allocation to DRAM
-	Weight = new int *** [info.Filter_Num_Size];
+	Weight = new float *** [info.Filter_Num_Size];
 
 	for(int m=0; m<info.Filter_Num_Size; m++)
 	{
-			Weight[m] = new int ** [info.Filter_Channel_Size];
+			Weight[m] = new float ** [info.Filter_Channel_Size];
 			for(int c=0; c<info.Filter_Channel_Size; c++)
 			{
-				Weight[m][c] = new int * [info.Filter_Col_Size];
+				Weight[m][c] = new float * [info.Filter_Col_Size];
 				for(int r=0; r<info.Filter_Col_Size; r++)
-					Weight[m][c][r] = new int[info.Filter_Row_Size];
+					Weight[m][c][r] = new float[info.Filter_Row_Size];
 			}
 	}
 
@@ -62,7 +62,7 @@ bool Weight_FIFO::FIFOMapping(const int DRAM_Weight_fmap[][3][3][3], const Input
 
 //}
 
-auto Weight_FIFO::FIFOtoPE(const Input_Weight_Info &info){
+float** Weight_FIFO::FIFOtoPE(const Input_Weight_Info &info){
 	/*
 	int tmp_array[Element_Size]; 
 	for(int i = 0; i<Element_Size; i++){
@@ -76,8 +76,8 @@ auto Weight_FIFO::FIFOtoPE(const Input_Weight_Info &info){
 	*/
 
 	// Allocate temporal Weight Bus, Deallocate in MXU::Set_PE_Weight
-	int **tmp = new int*[info.One_Filter_Size];
-	for(int i=0; i<info.One_Filter_Size; i++) tmp[i] = new int[info.Filter_Num_Size];
+	float **tmp = new float*[info.One_Filter_Size];
+	for(int i=0; i<info.One_Filter_Size; i++) tmp[i] = new float[info.Filter_Num_Size];
 
 	for(int i=0; i<info.Filter_Num_Size; i++){
 		for(int c=0; c<info.Filter_Row_Size; c++){

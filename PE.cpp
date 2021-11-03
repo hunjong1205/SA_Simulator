@@ -15,7 +15,7 @@ void PE::Set_Scratchpad(int Weight){
 }
 
 // One_Filter_Size = Filter 한개당 Row * Col * Channel
-void MXU::Set_PE_Weight(auto Weight, const Input_Weight_Info &info){
+void MXU::Set_PE_Weight(float Weight[][32], const Input_Weight_Info &info){
 	for(int k = 0; k < info.One_Filter_Size; k++){
 		for(int j = 0; j < info.Filter_Num_Size; j++)
 			PEs[k][j].Set_Scratchpad(Weight[k][j]);

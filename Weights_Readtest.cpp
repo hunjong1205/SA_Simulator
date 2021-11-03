@@ -2,20 +2,20 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include "InputWeight_Info.hpp"
  
 using namespace std;
 
 int ReverseInt(int i);
-void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int Input_fmap[10000][1][28][28], Input_Weight_Info &info);
+void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr);
 void ReadMNISTLabel(vector<unsigned char> &arr);
 void ReadWeights();
  
 int main()
 {
-//    vector<vector<double>> ai;
-//   ReadMNIST(10000, 784, ai, Input_fmap, info);                // 훈련데이터를 불러옴
-	ReadWeights();
+    vector<vector<double>> ai;
+
+    ReadMNIST(10000, 784, ai);                // 훈련데이터를 불러옴
+//	ReadWeights();
 
 //  vector<unsigned char> al;
 //  ReadMNISTLabel(al);                        // 레이블을 읽어 옴
@@ -33,7 +33,7 @@ int main()
 	return 0;
 	
 }
- 
+/* 
 void ReadWeights(){
 
 	float Weights[32][3][3];	
@@ -71,6 +71,7 @@ void ReadWeights(){
 	}
 
 }
+*/
  
 int ReverseInt(int i)
 {
@@ -81,7 +82,7 @@ int ReverseInt(int i)
     ch4 = (i >> 24) & 255;
     return((int)ch1 << 24) + ((int)ch2 << 16) + ((int)ch3 << 8) + ch4;
 }
-void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int Input_fmap[10000][1][28][28], Input_Weight_Info &info)   // MNIST데이터를 읽어온다.
+void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr)   // MNIST데이터를 읽어온다.
 {
     arr.resize(NumberOfImages, vector<double>(DataOfAnImage));
     ifstream file("./t10k-images-idx3-ubyte", ios::binary);
@@ -99,11 +100,8 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &ar
         number_of_images = ReverseInt(number_of_images);
         file.read((char*)&n_rows, sizeof(n_rows));
         n_rows = ReverseInt(n_rows);
-		info.Input_fmap_Row_Size = n_rows;
         file.read((char*)&n_cols, sizeof(n_cols));
         n_cols = ReverseInt(n_cols);
-		info.Input_fmap_Col_Size = n_cols;
-		info.Input_fmap_Channel_Size = 1;
  
         char inputstring[1000];
         for (int i = 0; i<10000; ++i)
@@ -115,8 +113,15 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &ar
                     unsigned char temp = 0;
                     file.read((char*)&temp, sizeof(temp));
                     arr[i][(n_rows*r) + c] = (double)temp;
-					Input_fmap[i][0][r][c] = (int)temp;
                 }
+            }
+        }
+        for(int i = 0; i<100; i++)
+        {
+            for(int j = 0; j<(n_rows + n_cols); j++)
+            {
+                cout << arr[i][j] << endl;
+               // cout << (uint8_t)arr[i][j] << endl;
             }
         }
     }

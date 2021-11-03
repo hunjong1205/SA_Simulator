@@ -15,3 +15,13 @@ Input_Weight_Info::Input_Weight_Info(int Input_Row_Size , int Input_Col_Size , i
 
 }
 
+void Input_Weight_Info::print(){
+	cout << Input_fmap_Row_Size << endl;
+	cout << Input_fmap_Col_Size << endl;
+	cout << Input_fmap_Channel_Size << endl;
+	cout << Filter_Row_Size << endl;
+	cout << Filter_Col_Size << endl;
+	cout << Filter_Channel_Size << endl;
+	cout << Filter_Num_Size << endl;
+	cout << One_Filter_Size << endl;
+}

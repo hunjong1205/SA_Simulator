@@ -2,11 +2,11 @@
  
 using namespace std;
 
-void Data(int Input_fmap[10000][1][28][28], float Weights[32][1][3][3], Input_Weight_Info &info)
+void Data(uint8_t Input_fmap[10000][1][28][28], float Weights[32][1][3][3], Input_Weight_Info &info)
 {
     vector<vector<double>> ai;
     ReadMNIST(10000, 784, ai, Input_fmap, info);                // 훈련데이터를 불러옴
-    ReadWeights(Weights);
+    ReadWeights(Weights, info);
 
 //  vector<unsigned char> al;
 //  ReadMNISTLabel(al);                        // 레이블을 읽어 옴
@@ -24,7 +24,7 @@ void Data(int Input_fmap[10000][1][28][28], float Weights[32][1][3][3], Input_We
 	
 }
  
-void ReadWeights(float Weights[32][1][3][3]){
+void ReadWeights(float Weights[32][1][3][3], Input_Weight_Info &info){
 
 	string WeightsFile = "weights.dat";
 	ifstream inFile;
@@ -48,6 +48,13 @@ void ReadWeights(float Weights[32][1][3][3]){
 		cerr << "Can't find Weights file" << WeightsFile << endl;
 	}
 
+    info.Filter_Row_Size = 3;
+    info.Filter_Col_Size = 3;
+    info.Filter_Channel_Size = 1;
+    info.Filter_Num_Size = 32;
+    info.One_Filter_Size = 3 * 3 * 1;
+    info.Strides = 1;
+
 }
  
 int ReverseInt(int i)
@@ -59,7 +66,7 @@ int ReverseInt(int i)
     ch4 = (i >> 24) & 255;
     return((int)ch1 << 24) + ((int)ch2 << 16) + ((int)ch3 << 8) + ch4;
 }
-void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, int Input_fmap[10000][1][28][28], Input_Weight_Info &info)   // MNIST데이터를 읽어온다.
+void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, uint8_t Input_fmap[10000][1][28][28], Input_Weight_Info &info)   // MNIST데이터를 읽어온다.
 {
     arr.resize(NumberOfImages, vector<double>(DataOfAnImage));
     ifstream file("./t10k-images-idx3-ubyte", ios::binary);
@@ -93,7 +100,7 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &ar
                     unsigned char temp = 0;
                     file.read((char*)&temp, sizeof(temp));
                     arr[i][(n_rows*r) + c] = (double)temp;
-					Input_fmap[i][0][r][c] = (int)temp;
+					Input_fmap[i][0][r][c] = (uint8_t)temp;
                 }
             }
         }
