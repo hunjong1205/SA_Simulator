@@ -3,6 +3,7 @@
 #include "Weight_FIFO.h"
 #include "Accumulator.h"
 #include "ReadMNIST.h"
+#include "InputWeight_Info.h"
 
 using namespace std;
 
@@ -24,7 +25,7 @@ int main(){
 	// Input fmap Settings, Filter fmap Settings
 	cout << "Configure Input feature map & Filter feature map start! \n";
 
-	Input_Weight_Info Info;
+	Input_Weight_Info Info(0, 0, 0, 0, 0, 0, 0, 0);
 	Data(DRAM_Input_fmap, DRAM_Weight_fmap, Info);
 
 	cout << "Configured! \n";

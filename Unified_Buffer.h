@@ -1,7 +1,8 @@
-#include "InputWeight_Info.hpp"
-#include "iostream"
-#include "queue"
-#include "cstring"
+#include "InputWeight_Info.h"
+#include <iostream>
+#include <queue>
+#include <cstring>
+
 
 using namespace std;
 

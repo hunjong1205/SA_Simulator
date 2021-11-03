@@ -1,5 +1,5 @@
 #include <iostream>
-#include "InputWeight_Info.hpp"
+#include "InputWeight_Info.h"
 
 using namespace std;
 

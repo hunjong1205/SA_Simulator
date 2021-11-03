@@ -2,7 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include "InputWeight_Info.hpp"
+#include "InputWeight_Info.h"
  
 using namespace std;
 

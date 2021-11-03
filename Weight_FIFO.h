@@ -2,7 +2,7 @@
 #include <queue>
 #include <algorithm>
 #include <cstring>
-#include "InputWeight_Info.hpp"
+#include "InputWeight_Info.h"
 
 using namespace std;
 

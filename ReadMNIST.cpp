@@ -1,5 +1,4 @@
 #include "ReadMNIST.h"
-#include "InputWeight_Info.hpp"
  
 using namespace std;
 
@@ -7,7 +6,7 @@ void Data(int Input_fmap[10000][1][28][28], float Weights[32][1][3][3], Input_We
 {
     vector<vector<double>> ai;
     ReadMNIST(10000, 784, ai, Input_fmap, info);                // 훈련데이터를 불러옴
-	ReadWeights(Weights);
+    ReadWeights(Weights);
 
 //  vector<unsigned char> al;
 //  ReadMNISTLabel(al);                        // 레이블을 읽어 옴
