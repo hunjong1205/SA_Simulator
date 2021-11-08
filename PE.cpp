@@ -2,33 +2,35 @@
 
 using namespace std;
 
-void PE::MAC(int Pre_psum = 0){
-	PSUM = Scratchpad * IFMAP + Pre_psum;
+void PE::MAC(float Pre_psum = 0){
+	PSUM = Scratchpad * (float)IFMAP + Pre_psum;
 }
 
 void PE::Reset_Scratchpad(){
 	this -> Scratchpad = 0;	
 }
 
-void PE::Set_Scratchpad(int Weight){
+void PE::Set_Scratchpad(float Weight){
 	this -> Scratchpad = Weight;	
 }
 
 // One_Filter_Size = Filter 한개당 Row * Col * Channel
-void MXU::Set_PE_Weight(float Weight[][32], const Input_Weight_Info &info){
+void MXU::Set_PE_Weight(vector<vector<float>> Weight, const Input_Weight_Info &info){
 	for(int k = 0; k < info.One_Filter_Size; k++){
 		for(int j = 0; j < info.Filter_Num_Size; j++)
 			PEs[k][j].Set_Scratchpad(Weight[k][j]);
 	}
 
+	/*
 	if(Weight){
 		for(int i = 0; i <info.One_Filter_Size; i++)
 			delete[] Weight[i];
 		delete[] Weight;
 		Weight = nullptr;
 	}
+	*/
 
-	cout << "PE's Weight are configured! \n";
+	cout << "PE's Weight are configured! "<< "\n";
 }
 
 void MXU::Reset_PE_Weight(){
@@ -61,7 +63,7 @@ void MXU::MAC(const int* PE_Col){
 
 	cout << "MAC Operation is Done! \n";
 }
-void MXU::Get_MXU_Last_PSUM(int* PSUM){
+void MXU::Get_MXU_Last_PSUM(float* PSUM){
 //Get MUX's Partial Sum
 	for(int k=0; k<256; k++) PSUM[k] = PEs[255][k].Get_PSUM();
 }

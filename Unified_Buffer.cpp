@@ -3,8 +3,7 @@
 using namespace std;
 
 void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], const int Input_Index, const Input_Weight_Info &info){ 
-	cout << "Start Unified_Buffer QueueMapping !" << endl;
-	this -> Acc_Size = 0;
+	cout << "\n" << "Start Unified_Buffer QueueMapping !" << "\n";
 	this -> Input_fmap_square_length = (info.Input_fmap_Row_Size - info.Filter_Row_Size)/info.Strides + 1;
 	this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length * 2 - 1;
 	//input_fmap = new uint8_t **[info.Input_fmap_Channel_Size];
@@ -23,12 +22,11 @@ void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], cons
 		exit(EXIT_FAILURE);
 	}
 	*/
-	cout<< "Input fmap transferred from DRAM to Unified Buffer \n";
+	cout << "\n" << "Input fmap transferred from DRAM to Unified Buffer" << " \n";
 			
 	int Start_Col= 0;
 	int Start_Row= 0;
 	int Element_Index = 0;
-	Acc_Size = 0;
 
 	// Malloc Queue Size, It Needs QueueClear essentially!
 	// this -> FIFO = new queue<AR>;
@@ -50,7 +48,7 @@ void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], cons
 		}
 	}
 
-	cout<< "Input fmap Unified_Buffer to Input_Queue Done! \n";
+	cout<< "\n" << "Input fmap Unified_Buffer to Input_Queue Done! " << "\n";
 
 	// Memory Deallocation of input_fmap
 	/*
@@ -69,14 +67,19 @@ bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info 
 
 	if(Cycle > (Input_fmap_square_length)){
 		cout << "Queue to PE Transport is done! \n";
+		cout << "Debug \n" << endl;
 		return 0;
 	}
 	
 	// Input_feature map 사각형 앞부분
-	if(Cycle < (info.Filter_Num_Size - 1)){
+	//*
+//	if(Cycle < (info.Filter_Num_Size - 1)){
+	if(Cycle < (info.One_Filter_Size -1)){
 		for(int i=0; i<(Cycle+1); i++){
-			PE_Col[i] =	IFMAP_FIFO[i].front();		
+			PE_Col[i] =	(int)IFMAP_FIFO[i].front();		
 			IFMAP_FIFO[i].pop();
+			cout << "Cycle : "<< Cycle << "\n";
+			cout << "Data : "<< PE_Col[i] << "\n";
 		}	
 
 		return 1;
@@ -84,9 +87,11 @@ bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info 
 
 	// Input_feature map 사각형 중간 및 끝부분
 	else{
+		cout << "Debug else \n" << endl;
+		cout << "Cycle : \n" << Cycle << endl;
 		for(int i=0; i<info.One_Filter_Size; i++){
 			if(!IFMAP_FIFO[i].empty()){
-				PE_Col[i] =	IFMAP_FIFO[i].front();		
+				PE_Col[i] =	(int)IFMAP_FIFO[i].front();		
 				IFMAP_FIFO[i].pop();
 			}
 		}	
@@ -103,21 +108,29 @@ void Unified_Buffer::QueueClear(){
 	IFMAP_FIFO = nullptr;
 }
 
-void Unified_Buffer::Accumulator_to_Unified_Buffer(const int* ptr, const int Size)
+void Unified_Buffer::Accumulator_to_Unified_Buffer(const float* ptr, const int Size)
 {
-	int* temp = new int[Size];
+	float* temp = new float[Acc_Size + Size];
 
 	if(Accumulator_Psum){
 	for(int i=0; i<Acc_Size; i++)
 		temp[i] = Accumulator_Psum[i];
 	}
 
+	delete Accumulator_Psum;
+
 	Accumulator_Psum = temp;
 
 	for(int k=0; k<Size; k++)
-		Accumulator_Psum[Acc_Size] = ptr[k];
+		Accumulator_Psum[Acc_Size + k] = ptr[k];
 
 	Acc_Size += Size;
+
+	cout << "Acc_Size : " << Acc_Size << "\n" << endl;
+	cout << "Size : : " << Size << "\n" << endl;
+	for(int k=0; k<Acc_Size; k++)
+		cout << Accumulator_Psum[k] << ' ';
+
 }
 
 

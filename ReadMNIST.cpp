@@ -4,7 +4,7 @@ using namespace std;
 
 void Data(uint8_t Input_fmap[10000][1][28][28], float Weights[32][1][3][3], Input_Weight_Info &info)
 {
-    vector<vector<double>> ai;
+	vector<vector<double>> ai;
     ReadMNIST(10000, 784, ai, Input_fmap, info);                // 훈련데이터를 불러옴
     ReadWeights(Weights, info);
 
@@ -68,7 +68,7 @@ int ReverseInt(int i)
 }
 void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &arr, uint8_t Input_fmap[10000][1][28][28], Input_Weight_Info &info)   // MNIST데이터를 읽어온다.
 {
-    arr.resize(NumberOfImages, vector<double>(DataOfAnImage));
+    // arr.resize(NumberOfImages, vector<double>(DataOfAnImage));
     ifstream file("./t10k-images-idx3-ubyte", ios::binary);
     if (file.is_open())
     {
@@ -99,7 +99,7 @@ void ReadMNIST(int NumberOfImages, int DataOfAnImage, vector<vector<double>> &ar
                 {
                     unsigned char temp = 0;
                     file.read((char*)&temp, sizeof(temp));
-                    arr[i][(n_rows*r) + c] = (double)temp;
+                    // arr[i][(n_rows*r) + c] = (double)temp;
 					Input_fmap[i][0][r][c] = (uint8_t)temp;
                 }
             }

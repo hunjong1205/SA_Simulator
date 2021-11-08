@@ -4,9 +4,10 @@ using namespace std;
 
 void Accumulator::Init_Accumulator(){
 	for(int i = 0; i<256; i++) Psum_Accumulate[i] = 0;
+	Acc_Size = 255;
 }
 
-void Accumulator::Add_PartialSum(const int* PSUM){
+void Accumulator::Add_PartialSum(const float* PSUM){
 	/*
 	int* temp = new int[Acc_Size + Row_Size];
 
@@ -33,6 +34,6 @@ int Accumulator::Get_Accumulator_Size(){
 	return Acc_Size;
 }
 
-int* Accumulator::Get_Psum_ptr(){
+float* Accumulator::Get_Psum_ptr(){
 	return Psum_Accumulate;
 }

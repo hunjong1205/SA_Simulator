@@ -23,11 +23,36 @@ int main(){
 	cout << "Simulation Config Start \n";
 	
 	// Input fmap Settings, Filter fmap Settings
-	cout << "Configure Input feature map & Filter feature map start! \n";
+	cout << "Configure Input feature map & Filter from MNIST start! \n";
 
 	Input_Weight_Info Info(0, 0, 0, 0, 0, 0, 0, 0);
 	Data(DRAM_Input_fmap, DRAM_Weight_fmap, Info);
 	Info.print();
+
+	// Input, Filter Data test
+	/*
+	for(int i = 0; i<28; i++){
+		for(int j = 0; j<28; j++){
+			cout << (int)DRAM_Input_fmap[300][0][i][j] << "  ";
+		}
+		cout << endl;
+	}
+
+	*/
+
+
+	for(int i=0; i<Info.Filter_Num_Size; i++)
+	{
+		for(int j=0; j<Info.Filter_Channel_Size; j++)
+		{
+			for(int k=0; j<Info.Filter_Row_Size; j++)
+			{
+				for(int p=0; p<Info.Filter_Col_Size; p++)
+					cout <<  DRAM_Weight_fmap[i][j][k][p] << ' ';
+			}
+		}
+		cout << "\n";
+	}
 
 	cout << "Configured! \n";
 
@@ -47,48 +72,56 @@ int main(){
 	Weight_FIFO WF1;
 
 
-	int* PSUM = new int[256];
+	float* PSUM = new float[256];
 	int Unified_Buffer_Index = 0;
 	int Input_Index = 0;
 
 	bool Weight_FIFO_Init = 0;
 
 
-	cout << "Simulation Execution Start \n";
+	cout << "\n" << "Simulation Execution Start \n";
 	// PE execution(Push_PE_Input_fmap)
 	while(Input_Index < 10000)
 	{
 
 		// while(!UB1.QueueMapping) 으로 대체!
-		// 1. Unified Buffer to Input_fmap Queue
+		// 1. Unified Buffer to Systolic Data Setup Queue
 		UB1.QueueMapping(DRAM_Input_fmap[Input_Index], Input_Index, Info);
 
+		if(!Weight_FIFO_Init){
+			
 		// 2. Weight Array Structure to Weight FIFO
-		if(!Weight_FIFO_Init)
+		// Execute only once!
 		Weight_FIFO_Init = WF1.FIFOMapping(DRAM_Weight_fmap, Info);
 
 		// 3. Set PEs Weight
 		MXU1.Set_PE_Weight(WF1.FIFOtoPE(Info), Info);
+		}
 
-		// cout << "Start Input feature map Queue to PE \n";
+		cout << "\n" << "Start Input feature map Queue to PE " << "\n";
 
 		// 4. Input fmap to PE
 		// Get Input fmap data using PE_Col
-		// Unified_Buffer_Index = 0;
-		// Acc1.Init_Accumulator();
-		// while(UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, Info)){
+		Unified_Buffer_Index = 0;
+		Acc1.Init_Accumulator();
+		while(UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, Info)){
 		
 		// 5. PE MAC Operation
-		// MXU1.MAC(PE_Col);
-		// MXU1.Get_MXU_Last_PSUM(PSUM);
+		MXU1.MAC(PE_Col);
+		MXU1.Get_MXU_Last_PSUM(PSUM);
 		
 		// 6. Accumulate Partial_Sum
-		// Acc1.Add_PartialSum(PSUM);
-   		// }
+		Acc1.Add_PartialSum(PSUM);
+		cout << "End of While\n" << endl;
+   		}
+
+
+		cout << "Debug Accumul\n" << endl;
 
 		// 7. Accumulator PSUM to Unified_Buffer 
-		// UB1.Accumulator_to_Unified_Buffer(Acc1.Get_Psum_ptr(), Acc1.Get_Accumulator_Size());
+		UB1.Accumulator_to_Unified_Buffer(Acc1.Get_Psum_ptr(), Acc1.Get_Accumulator_Size());
 
+		exit(1);
 
 
 		++Input_Index;
