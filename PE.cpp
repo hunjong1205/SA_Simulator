@@ -40,7 +40,7 @@ void MXU::Reset_PE_Weight(){
 	}
 }
 
-void MXU::MAC(const int* PE_Col){
+void MXU::MAC(int* PE_Col = nullptr){
 
 	// Slide IFMAP in every PEs to next Column PE
 	for(int i=0; i<256; i++){
@@ -48,8 +48,15 @@ void MXU::MAC(const int* PE_Col){
 	}
 
 	// inputs New IFMAP to first Col PE
-	for(int k=0; k<256; k++)
+	// And initialize PE_Col[] = 0
+	for(int k=0; k<256; k++){
+		if(PE_Col){
 		PEs[k][0].Set_Ifmap(PE_Col[k]);
+		PE_Col[k] = 0;
+		}
+		else
+		PEs[k][0].Set_Ifmap(0);
+	}
 
 	// MAC Operation
 	for(int m=0; m<256; m++){
@@ -63,6 +70,7 @@ void MXU::MAC(const int* PE_Col){
 
 	cout << "MAC Operation is Done! \n";
 }
+
 void MXU::Get_MXU_Last_PSUM(float* PSUM){
 //Get MUX's Partial Sum
 	for(int k=0; k<256; k++) PSUM[k] = PEs[255][k].Get_PSUM();

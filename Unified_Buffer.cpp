@@ -5,7 +5,10 @@ using namespace std;
 void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], const int Input_Index, const Input_Weight_Info &info){ 
 	cout << "\n" << "Start Unified_Buffer QueueMapping !" << "\n";
 	this -> Input_fmap_square_length = (info.Input_fmap_Row_Size - info.Filter_Row_Size)/info.Strides + 1;
-	this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length * 2 - 1;
+	// 평행사변형 윗변 길이(빈공간 제외)
+	this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length;
+	//this -> Input_fmap_square_length = Input_fmap_square_length * Input_fmap_square_length * 2 - 1;
+	
 	//input_fmap = new uint8_t **[info.Input_fmap_Channel_Size];
 
 
@@ -63,32 +66,25 @@ void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], cons
 	*/
 }
 
-bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info &info){
+bool Unified_Buffer::QueuetoPE(int PE_Col[], const Input_Weight_Info &info){
 
-	if(Cycle > (Input_fmap_square_length)){
-		cout << "Queue to PE Transport is done! \n";
-		cout << "Debug \n" << endl;
-		return 0;
-	}
-	
-	// Input_feature map 사각형 앞부분
+	// Input_feature map 평행사변형 앞부분
 	//*
-//	if(Cycle < (info.Filter_Num_Size - 1)){
-	if(Cycle < (info.One_Filter_Size -1)){
-		for(int i=0; i<(Cycle+1); i++){
+	if(Unified_Cycle < (info.Filter_Num_Size)){
+		for(int i=0; i<(Unified_Cycle); i++){
 			PE_Col[i] =	(int)IFMAP_FIFO[i].front();		
 			IFMAP_FIFO[i].pop();
-			cout << "Cycle : "<< Cycle << "\n";
+			cout << "Unified_Cycle : "<< Unified_Cycle << "\n";
 			cout << "Data : "<< PE_Col[i] << "\n";
 		}	
 
 		return 1;
 	}
 
-	// Input_feature map 사각형 중간 및 끝부분
-	else{
+	// Input_feature map 평행사변형 중간 및 끝부분
+	else if((Unified_Cycle >= info.Filter_Num_Size) & (Unified_Cycle <= (Input_fmap_square_length + info.Filter_Num_Size))){
 		cout << "Debug else \n" << endl;
-		cout << "Cycle : \n" << Cycle << endl;
+		cout << "Unified_Cycle : \n" << Unified_Cycle << endl;
 		for(int i=0; i<info.One_Filter_Size; i++){
 			if(!IFMAP_FIFO[i].empty()){
 				PE_Col[i] =	(int)IFMAP_FIFO[i].front();		
@@ -98,6 +94,14 @@ bool Unified_Buffer::QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info 
 
 		return 1;
 	}
+	
+	// Input_feature map 모두 끝난 부분, No fetch
+	else{
+		cout << "Queue to PE Transport is done! \n";
+		cout << "Debug \n" << endl;
+		return 0;
+	}
+	
 	
 	return 0;
 

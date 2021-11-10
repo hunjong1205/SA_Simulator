@@ -73,7 +73,6 @@ int main(){
 
 
 	float* PSUM = new float[256];
-	int Unified_Buffer_Index = 0;
 	int Input_Index = 0;
 
 	bool Weight_FIFO_Init = 0;
@@ -100,11 +99,11 @@ int main(){
 
 		cout << "\n" << "Start Input feature map Queue to PE " << "\n";
 
+		Acc1.Init_Accumulator();
+
 		// 4. Input fmap to PE
 		// Get Input fmap data using PE_Col
-		Unified_Buffer_Index = 0;
-		Acc1.Init_Accumulator();
-		while(UB1.QueuetoPE(Unified_Buffer_Index++, PE_Col, Info)){
+		while(UB1.QueuetoPE(PE_Col, Info)){
 		
 		// 5. PE MAC Operation
 		MXU1.MAC(PE_Col);
@@ -112,9 +111,17 @@ int main(){
 		
 		// 6. Accumulate Partial_Sum
 		Acc1.Add_PartialSum(PSUM);
-		cout << "End of While\n" << endl;
    		}
 
+		cout << "Debug \n" << endl;
+		// 255 Cycle Mac Operation(This operation has no fetch input feature map)
+		for(int i=0; i<255; i++)
+		{
+			MXU1.MAC(nullptr);
+			MXU1.Get_MXU_Last_PSUM(PSUM);
+
+			Acc1.Add_PartialSum(PSUM);
+		}
 
 		cout << "Debug Accumul\n" << endl;
 

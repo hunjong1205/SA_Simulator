@@ -13,12 +13,14 @@ class Unified_Buffer {
 		float *Accumulator_Psum;
 		int Acc_Size;
 		int Input_fmap_square_length;
+		int Unified_Cycle;
 		
 
 	public:
 		Unified_Buffer(){
 			this -> Acc_Size = 0;
 			this -> Input_fmap_square_length = 0;
+			this -> Unified_Cycle = 1;
 			cout << "\n" << "Unified_Buffer Generated " << "\n" ;
 		};
 		~Unified_Buffer(){
@@ -29,6 +31,6 @@ class Unified_Buffer {
 
 		void QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], const int Input_Index, const Input_Weight_Info &info);
 		void QueueClear();
-		bool QueuetoPE(int Cycle, int PE_Col[], const Input_Weight_Info &info);
+		bool QueuetoPE(int PE_Col[], const Input_Weight_Info &info);
 		void Accumulator_to_Unified_Buffer(const float* ptr, const int Size);
 };
