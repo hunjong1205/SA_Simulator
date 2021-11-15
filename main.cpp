@@ -80,7 +80,7 @@ int main(){
 
 	cout << "\n" << "Simulation Execution Start \n";
 	// PE execution(Push_PE_Input_fmap)
-	while(Input_Index < 10000)
+	while(Input_Index < 100)
 	{
 
 		// while(!UB1.QueueMapping) 으로 대체!
@@ -108,7 +108,7 @@ int main(){
 		// 5. PE MAC Operation
 		MXU1.MAC(PE_Col);
 		MXU1.Get_MXU_Last_PSUM(PSUM);
-		
+
 		// 6. Accumulate Partial_Sum
 		Acc1.Add_PartialSum(PSUM);
    		}

@@ -138,10 +138,12 @@ void Unified_Buffer::Accumulator_to_Unified_Buffer(const float* ptr, const int S
 
 	Acc_Size += Size;
 
-	cout << "Acc_Size : " << Acc_Size << "\n" << endl;
-	cout << "Size : : " << Size << "\n" << endl;
-	for(int k=0; k<Acc_Size; k++)
-		cout << Accumulator_Psum[k] << ' ';
+//	cout << "Acc_Size : " << Acc_Size << "\n" << endl;
+//	cout << "Size : : " << Size << "\n" << endl;
+	for(int k=0; k<Acc_Size; k++){
+		cout.precision(5);
+		cout << fixed << Accumulator_Psum[k] << ' ';
+	}
 
 }
 

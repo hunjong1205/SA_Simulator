@@ -114,15 +114,13 @@ vector<vector<float>> Weight_FIFO::FIFOtoPE(const Input_Weight_Info &info){
 				for(int c=0; c<info.Filter_Channel_Size; c++){
 					//tmp[info.One_Filter_Size - (a + b + c)][i] = Weight[i][a][b][c];
 //					cout << "Debug \n" << endl;
-					//temp_vector[info.One_Filter_Size - ((a+1) * (b+1) * (c+1))][i] = Weight[i][c][a][b];
-					temp_vector[info.One_Filter_Size - ((a+1) * (b+1) * (c+1))][i] = 0;
+					temp_vector[info.One_Filter_Size - ((a+1) * (b+1) * (c+1))][i] = Weight[i][c][a][b];
+					//temp_vector[info.One_Filter_Size - ((a+1) * (b+1) * (c+1))][i] = 0;
 
 				}
 			}
 		}
 	}
-
-	cout << "Debug \n" << endl;
 
 	return temp_vector;
 

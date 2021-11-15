@@ -4,6 +4,8 @@ using namespace std;
 
 void PE::MAC(float Pre_psum = 0){
 	PSUM = Scratchpad * (float)IFMAP + Pre_psum;
+//	cout.precision(5);
+//	cout << fixed << PSUM << ' ';
 }
 
 void PE::Reset_Scratchpad(){
@@ -12,13 +14,16 @@ void PE::Reset_Scratchpad(){
 
 void PE::Set_Scratchpad(float Weight){
 	this -> Scratchpad = Weight;	
+//	cout.precision(5);
+//	cout << fixed << Weight << ' ';
 }
 
 // One_Filter_Size = Filter 한개당 Row * Col * Channel
 void MXU::Set_PE_Weight(vector<vector<float>> Weight, const Input_Weight_Info &info){
 	for(int k = 0; k < info.One_Filter_Size; k++){
-		for(int j = 0; j < info.Filter_Num_Size; j++)
+		for(int j = 0; j < info.Filter_Num_Size; j++){
 			PEs[k][j].Set_Scratchpad(Weight[k][j]);
+		}
 	}
 
 	/*
