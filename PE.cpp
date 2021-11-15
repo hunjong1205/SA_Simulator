@@ -68,7 +68,7 @@ void MXU::MAC(int* PE_Col = nullptr){
 		}
 	} // then, PE[255][0~255] has Partial Sum
 
-	cout << "MAC Operation is Done! \n";
+//	cout << "MAC Operation is Done! \n";
 }
 
 void MXU::Get_MXU_Last_PSUM(float* PSUM){

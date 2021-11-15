@@ -24,8 +24,8 @@ class Unified_Buffer {
 			cout << "\n" << "Unified_Buffer Generated " << "\n" ;
 		};
 		~Unified_Buffer(){
-		if(Accumulator_Psum) delete Accumulator_Psum;
-		if(IFMAP_FIFO) delete IFMAP_FIFO;
+		if(Accumulator_Psum) delete[] Accumulator_Psum;
+		if(IFMAP_FIFO) delete[] IFMAP_FIFO;
 		cout << "\n" << "Unified_Buffer Deallocated" << "\n";
 		};
 

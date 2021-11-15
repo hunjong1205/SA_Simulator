@@ -25,8 +25,9 @@ void Accumulator::Add_PartialSum(const float* PSUM){
 	*/
 	
 	//Accumulate Memory
-	for(int i=0; i<256; i++)
+	for(int i=0; i<256; i++){
 		Psum_Accumulate[i] += PSUM[i];	
+	}
 		
 }
 

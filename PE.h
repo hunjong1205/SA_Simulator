@@ -19,7 +19,7 @@ class PE {
 		this -> PSUM = 0;
 	}
 	int Get_Ifmap(){ return IFMAP;};
-	int Set_Ifmap(int IFMAP) { this-> IFMAP = IFMAP; };
+	void Set_Ifmap(int IFMAP) { this -> IFMAP = IFMAP; };
 	void MAC(float Pre_psum);  // Output Partial Sum
 	float Get_PSUM(){ return PSUM; };
 	void Reset_Scratchpad();

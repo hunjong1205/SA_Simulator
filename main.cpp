@@ -113,7 +113,6 @@ int main(){
 		Acc1.Add_PartialSum(PSUM);
    		}
 
-		cout << "Debug \n" << endl;
 		// 255 Cycle Mac Operation(This operation has no fetch input feature map)
 		for(int i=0; i<255; i++)
 		{
@@ -123,13 +122,10 @@ int main(){
 			Acc1.Add_PartialSum(PSUM);
 		}
 
-		cout << "Debug Accumul\n" << endl;
+		cout << "Debug Accumulate" << endl;
 
 		// 7. Accumulator PSUM to Unified_Buffer 
 		UB1.Accumulator_to_Unified_Buffer(Acc1.Get_Psum_ptr(), Acc1.Get_Accumulator_Size());
-
-		exit(1);
-
 
 		++Input_Index;
 		// UB1 Deallocation
@@ -147,7 +143,4 @@ int main(){
 
 	return 0;
 }
-
-// Input, Weight featuremap information -> Struct
 // Weight_FIFO Configuration
-// Input from Tensorflow 

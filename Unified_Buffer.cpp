@@ -34,7 +34,8 @@ void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], cons
 	// Malloc Queue Size, It Needs QueueClear essentially!
 	// this -> FIFO = new queue<AR>;
 	// Malloc Queue Size, It Needs QueueClear essentially!
-	this -> IFMAP_FIFO = new queue<uint8_t>[info.One_Filter_Size];
+//	this -> IFMAP_FIFO = new queue<uint8_t>[info.One_Filter_Size];
+	this -> IFMAP_FIFO = new queue<uint8_t>[info.Filter_Num_Size];
 
 	// Unified_Buffer to Input_Queue(Systolic_Data Setup)
 	for(int Start_Row=0; Start_Row<(info.Input_fmap_Row_Size-info.Filter_Row_Size+1); Start_Row++){
@@ -68,23 +69,27 @@ void Unified_Buffer::QueueMapping(const uint8_t DRAM_input_fmap[1][28][28], cons
 
 bool Unified_Buffer::QueuetoPE(int PE_Col[], const Input_Weight_Info &info){
 
+
+//	cout << "Unified_Cycle : "<< Unified_Cycle << endl;
 	// Input_feature map 평행사변형 앞부분
 	//*
 	if(Unified_Cycle < (info.Filter_Num_Size)){
 		for(int i=0; i<(Unified_Cycle); i++){
+//			cout << " i : "<< i << endl;
+//			cout << " IFMAP_FIFO.front() : " << (int)IFMAP_FIFO[i].front() << endl;
+//			cout << " IFMAP_FIFO.size() : " << IFMAP_FIFO[i].size() << endl;
 			PE_Col[i] =	(int)IFMAP_FIFO[i].front();		
 			IFMAP_FIFO[i].pop();
-			cout << "Unified_Cycle : "<< Unified_Cycle << "\n";
-			cout << "Data : "<< PE_Col[i] << "\n";
 		}	
+
+		Unified_Cycle++;
 
 		return 1;
 	}
 
 	// Input_feature map 평행사변형 중간 및 끝부분
-	else if((Unified_Cycle >= info.Filter_Num_Size) & (Unified_Cycle <= (Input_fmap_square_length + info.Filter_Num_Size))){
-		cout << "Debug else \n" << endl;
-		cout << "Unified_Cycle : \n" << Unified_Cycle << endl;
+	else if((Unified_Cycle >= info.Filter_Num_Size) && (Unified_Cycle <= (Input_fmap_square_length + info.Filter_Num_Size))){
+//		cout << "Unified_Cycle : \n" << Unified_Cycle << endl;
 		for(int i=0; i<info.One_Filter_Size; i++){
 			if(!IFMAP_FIFO[i].empty()){
 				PE_Col[i] =	(int)IFMAP_FIFO[i].front();		
@@ -92,16 +97,19 @@ bool Unified_Buffer::QueuetoPE(int PE_Col[], const Input_Weight_Info &info){
 			}
 		}	
 
+//		cout << "State 2"<< endl;
+
+		Unified_Cycle++;
+
 		return 1;
 	}
 	
 	// Input_feature map 모두 끝난 부분, No fetch
 	else{
 		cout << "Queue to PE Transport is done! \n";
-		cout << "Debug \n" << endl;
+		Unified_Cycle = 0;
 		return 0;
 	}
-	
 	
 	return 0;
 
